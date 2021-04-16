@@ -87,10 +87,105 @@ ggsave("images/example.png", width = 7, height = 4)
 ## Informative title for section addressing a research question
 ## Informative title for section addressing a research question
 
-```{r, include = FALSE}
-library(tidyverse)
-library(lme4)
+# Q3 
+
+## data wrangling
+```{r}
+#read data
+phase1_applicants <- read.csv("data/phase1-new-grad-applicants-2020.csv")
+phase2_applicants <- read.csv("data/phase2-new-grad-applicants-2020.csv")
+phase3_applicants <- read.csv("data/phase3-new-grad-applicants-2020.csv")
+final_hired <- read.csv("data/final-hires-newgrad_2020.csv")
+
+#make new variable which tells whether applicant is accepted for each phase or not
+final_hired_cleaned <- final_hired %>% 
+  mutate(hired = 1)
+
+phase3_applicants_cleaned <- phase3_applicants %>% 
+  mutate(phase2accepted = 1) %>% 
+  full_join(final_hired_cleaned) %>% 
+  mutate(hired = replace_na(hired, 0)) %>% 
+  left_join(phase2_applicants) %>% 
+  select(applicant_id, interviewer_rating_1, interviewer_rating_2, gender, hired, phase2accepted)
+
+phase2_applicants_cleaned <- phase2_applicants %>% 
+  mutate(phase1accepted = 1) %>% 
+  full_join(phase3_applicants_cleaned) %>% 
+  mutate(phase2accepted = replace_na(phase2accepted, 0)) %>% 
+  select(-interviewer_rating_1, -interviewer_rating_2)
+
+phase1_applicants_cleaned <- phase1_applicants %>% 
+  full_join(phase2_applicants_cleaned) %>% 
+  mutate(phase1accepted = replace_na(phase1accepted, 0)) %>% 
+  select(-technical_skills, -writing_skills, -leadership_presence, -speaking_skills, -phase2accepted)
 ```
+
+## data exploratory
+```{r}
+#proportion of female
+sum(phase1_applicants$gender == "Woman") / nrow(phase1_applicants)
+
+#stacked bar chart that displays the proportion of applicants with each accepted group, for each gender
+ggplot(data = phase1_applicants_cleaned, aes(x = gender, fill = as.factor(phase1accepted))) +
+  geom_bar(position = "fill") +
+  ylab("Proportion") + 
+  scale_fill_grey() +
+  theme_minimal() +
+  xlab("sex")
+
+#Empirical logit plot
+phase3_applicants_graph <- phase3_applicants_cleaned %>%
+  group_by(gender) %>%
+  mutate(interviewer_rating_1_cut = cut_number(interviewer_rating_1,5))
+  
+emplogit1 <- phase3_applicants_graph %>%
+  group_by(gender, interviewer_rating_1_cut) %>%
+  summarise(prop.lose = mean(hired), 
+            n = n(),
+            midpoint = median(interviewer_rating_1), .groups = "drop") %>%
+  mutate(prop.lose = ifelse(prop.lose==0, .01, prop.lose),
+         emplogit = log(prop.lose / (1 - prop.lose)))
+
+ggplot(emplogit1, aes(x = midpoint, y = emplogit, color = gender)) +
+  #geom_point(aes(shape = gender)) +
+  geom_smooth(aes(linetype = gender), 
+              method = "lm", formula = "y~x") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Dark2")
+```
+
+
+## modeling
+
+### phase 1
+```{r}
+#use generalized linear model since all variables take large part of grades
+
+#In model0, cannot see significant p-value 
+#model where gender is only predictor
+model0 <- glm(phase1accepted ~ gender, family = binomial, data = phase1_applicants_cleaned)
+summary(model0)
+
+model1 <- glm(phase1accepted ~ team_applied_for + cover_letter + cv+ gpa + extracurriculars + work_experience, family = binomial(link = "logit"), data = phase1_applicants_cleaned)
+
+model2_w_gender <- glm(phase1accepted ~ team_applied_for + cover_letter + cv+ gpa + gender +  extracurriculars + work_experience, family = binomial(link = "logit"), data = phase1_applicants_cleaned)
+
+drop_in_deviance <- anova(model1, model2_w_gender, test = "Chisq")
+drop_in_deviance
+```
+
+Since confidence interval of all genders includes 0, at the 95% confidence level, it is believable that male applicants and female applicants with applicants who prefer not to say gender have the same odds of accepted by AI in phase 1. We will see more carefully that AI is biased with gender with other variables in phase 1.
+
+The deviance test tells us that it is not preferable that adding gender as an indicator variable to the model. The deviance difference between models with gender and without gender is 1.21, which is pretty small. Also, the large p-value also supports that adding new indicator variable, which is gender, to the model with all the other variables is not helpful.
+
+### phase 3
+```{r}
+model0_3 <- glm(hired ~ interviewer_rating_1 + interviewer_rating_2, data = phase3_applicants_cleaned)
+model1_3 <- glm(hired ~ interviewer_rating_1 + interviewer_rating_2 + gender, data = phase3_applicants_cleaned)
+anova(model0_3, model1_3, test = "Chisq")
+```
+
+The deviance test tells us that it is not preferable that adding gender as an indicator variable to the model. The deviance difference between models with gender and without gender is 0.23, which is pretty small. Even though the p-value is not that big, we can still say model with gender does not gives better prediction for hiring results in the interview in phase 3.
 
 ## Discussion
 
