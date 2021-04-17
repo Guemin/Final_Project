@@ -20,6 +20,7 @@ titlepage-rule-height: 2
 library(tidyverse)
 library(lme4)
 library(mgcv)
+library(kableExtra)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
 ```
@@ -205,8 +206,6 @@ lmtest::lrtest(salary_lmer, salary_lmer_no_gender)
 
 ## Informative title for section addressing a research question(PROMOTION)
 
-
-
 ```{r}
 #unique(black_saber_current_employees_cleaned$financial_q) --> from '2013 Q2' to '2020 Q4'
 df_promotion1 <- black_saber_current_employees_cleaned %>%
@@ -230,6 +229,130 @@ df_promotion <- full_join(df_promotion1, df_promotion2) %>%
   unique()
   
 df_promotion_cleaned <- full_join(black_saber_current_employees_cleaned, df_promotion)
+############################################################################################################
+#DATA CLEANING PART
+############################################################################################################
+
+# create a new variable called `employee_role` which saves role_seniority as numbers and
+# create another variable called `initial_role` that indicates the initial role of the employee
+role_seniority_data <- black_saber_current_employees_cleaned %>% 
+  mutate(employee_role = as.numeric(role_seniority)) %>%
+  select(employee_id, employee_role) %>%
+  unique()%>%
+  group_by(employee_id)%>%
+  mutate(initial_role=min(employee_role)) %>%
+  mutate(current_role=max(employee_role))
+
+# filter from the role_seniority_data to only include people with 
+# their current roles different from their initial roles
+# create a new variable called `promoted` to indicate whether the employee has been promoted 
+# from their initial role
+promoted_only_data <- role_seniority_data%>%
+  filter(current_role!=initial_role) %>%
+  mutate(promoted = 1) %>%
+  filter(current_role==employee_role)
+
+# insert `promoted` variable to the black_saber_current_employees_cleaned data
+# replace NA's in the `promoted` column with 0
+promotion_data <- full_join(black_saber_current_employees_cleaned, promoted_only_data) %>%
+  select(-c(employee_role, initial_role, current_role)) %>% 
+  mutate(promoted = replace_na(promoted, 0)) %>% 
+  mutate(leadership_score = case_when(leadership_for_level=="Needs improvement" ~ 0,
+                                 leadership_for_level=="Appropriate for level" ~ 1,
+                                 leadership_for_level=="Exceeds expectations" ~ 2))
+
+# count how many financial quarters each employee has gone through
+# this gives us an idea of how long each employee has been working at the company
+working_period <- black_saber_current_employees_cleaned %>%
+  group_by(employee_id) %>%
+  summarise(financial_q_count = n())
+
+# combined promotion_data and working_period
+promotion_data <- full_join(promotion_data, working_period)
+
+# data that only contains the most recent (2020 Q4) information on each employee
+recent_employee_data <- promotion_data %>%
+   mutate(year = as.numeric(str_extract_all(financial_q, "\\d+\\d+"))) %>%
+   mutate(quarter = as.numeric(substr(financial_q,7,7))) %>% 
+   group_by(employee_id) %>%
+   mutate(recent_year = max(year)) %>%
+   filter(year == recent_year) %>%
+   mutate(recent_quarter = max(quarter)) %>%
+   filter(quarter == recent_quarter) %>%
+   right_join(y = role_seniority_data) %>% 
+   filter(employee_role == current_role) %>% 
+   select(-c(year, quarter, recent_year, recent_quarter, current_role, employee_role, initial_role))
+
+#########################################################################################################
+#EXPLORATORY ANALYSIS
+#########################################################################################################
+
+
+# exploring whether there is gender difference in promotion status
+
+promotion_status_by_gender <- promotion_data %>% 
+  ggplot(aes(x = gender, fill = as.factor(promoted))) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  scale_fill_manual(values=c("#9999CC", "#6C3082")) +
+  labs(title = "Boxplots for Promotion Status by Gender")
+
+promotion_status_by_gender
+
+# exploring whether there is a difference in promotion status according to working period
+
+promotion_status_by_working_period <- promotion_data %>% 
+  ggplot(aes(x = financial_q_count, fill = as.factor(promoted))) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  scale_fill_manual(labels = c("Never got promoted", "Got promoted at least once"),
+                    values=c("#9999CC", "#6C3082")) +
+  labs(title = "Boxplots for Promotion Status by Working Period",
+       x = "Number of quarters spent at the company",
+       fill = "Promotion status"
+       )
+
+# proportion of people who have been promoted for at least once by the working period 
+# (according to the number of financial quarters spent at the company)
+promotion_status_by_working_period <- recent_employee_data %>%
+  group_by(financial_q_count) %>%
+  summarise(count = n(), promoted_proportion = sum(promoted)/count) %>%
+  select(-count) 
+
+# this table could go into the appendix
+kable(promotion_status_by_working_period, caption = "Proportion of promoted employee by their working period", booktabs = TRUE, valign = "t") %>%
+  kable_styling(latex_options = "hold_position")
+
+#########################################################################################################
+#MODEL FITTING
+#########################################################################################################
+
+promotion_model1 <- glm(promoted ~ gender + leadership_for_level + productivity + financial_q_count, family = binomial(link = "logit"), data = recent_employee_data)
+
+summary(promotion_model1)
+
+# Goodness-of-fit test for promotion_model1
+mod1_p_value <- 1 - pchisq(promotion_model1$deviance, promotion_model1$df.residual)
+mod1_p_value
+# no evidence against the significant lack of fit
+
+# Should we consider to include `team` variable in the model? If so, should it be a random effect?
+promotion_model2 <- glmer(promoted ~ gender + leadership_for_level + productivity + financial_q_count + (1 | team), family = binomial(link = "logit"), data = recent_employee_data)
+
+conf_int <- confint(promotion_model2)
+
+table <- cbind(round(exp(summary(promotion_model2)$coeff[,1]),2),
+               round(exp(conf_int[-1,]),2),
+               round(summary(promotion_model2)$coeff[,4], 4))
+
+colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "P-value")
+
+knitr::kable(table)
+# if we want to create a model with a response that indicates the total number of promotions for each employee,
+# we must take different working periods into account.
+
+#########################################################################################################
+
 ```
 
 
