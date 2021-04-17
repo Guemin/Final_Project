@@ -1,7 +1,7 @@
 ---
-title: "Report title"
+title: "An analysis of whether "
 subtitle: "Subtitle"
-author: "Report prepared for Black Saber Software by Eminence Analytics"
+author: "Report prepared for Black Saber Software by KoCad"
 date: 2021-04-21
 lang: "en"
 output:
@@ -18,6 +18,8 @@ titlepage-rule-height: 2
 
 ```{r, message = FALSE, echo=FALSE}
 library(tidyverse)
+library(lme4)
+library(mgcv)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
 ```
@@ -54,11 +56,24 @@ _This part of the report is much more comprehensive than the executive summary. 
 ## Introduction
 
 _Provide a brief introduction to your report and outline what the report will cover. This section is valuable for setting scope and expectations. _
+The present report investigates whether employees in Black Saber Software gets hired, promoted, and receives salary by their talents and values to the company, with a special focus on gender biases exist in any of these processes. 
+
 
 ### Research questions
 _Use bullet points to to describe the research questions you are going to address. Write in full sentences._
+1) Salary: The purpose of this survey is to explore factors related to increase rate(amount) of salary by every quarter(?). What kind of employees on this company get a higher salary when the quarter changes? What factors, such as gender, team, role, leadership level, productivity, are related to increased rate of salary? Among those who get a higher salary compared to the previous quarter, to what extent is gender associated with salary increase rate? It is commonly assumed that males have more advantages than females. Is this true on Black Saber Software? 
 
-## Informative title for section addressing a research question
+2) 
+Promotion: The purpose of this survey is to explore factors related to promotion. What kind of employees on this company are promoted? What factors, such as gender, team, role, leadership level, productivity, are related to whether employees are promoted? Among those who promoted, to what extent is gender associated with promotion status? It is commonly assumed that males have more advantages than females. Is this true on Black Saber Software?
+
+
+3) Hiring process: The purpose of this survey is to see whether there is gender bias throughout the hiring phase (This can be a general question). Then (as specific questions), we can see whether there is bias within algorithms AND humans (the recruiters and interviewers?). 
+
+
+
+
+
+## Informative title for section addressing a research question(SALARY)
 
 _For each research question, you will want to briefly describe any data manipulation, show some exploratory plots/summary tables, report on any methods you use (i.e. models you fit) and the conclusions you draw from these_
 
@@ -84,7 +99,141 @@ ggsave("images/example.png", width = 7, height = 4)
 
 ![](images/example.png)
 
-## Informative title for section addressing a research question
+
+```{r, data_analysis_salary}
+############################################################################################################
+#DATA CLEANING PART
+#########################################################################################################
+
+# read in the data
+black_saber_current_employees <- read_csv("data/black-saber-current-employees.csv")
+
+#change salary varaible from characters to doubles
+black_saber_current_employees_cleaned <- black_saber_current_employees %>% 
+  mutate(salary = str_extract_all(salary, "\\d+,\\d+")) %>% #only extracting the number part(i.e., remove $)
+  mutate(salary = str_remove_all(salary, ",")) %>% # remove comma(,)
+  mutate(salary = as.numeric(salary)) %>% #change to doubles
+  mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 7)) %>% #changing the orders of role as hierarchy, rather than alphabetical order
+  mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
+
+#(Before changing): Director Entry-level Junior I Junior II Manager Senior I Senior II Senior III Vice president
+#(After chaning): “Entry-level”,“Junior I”,“JuniorII”,“Senior I”,“Senior II”,“Senior III”,“Manager”, “Director”,“Vicepresident” 
+
+#########################################################################################################
+#EXPLORATORY ANALYSIS(PLEASE SEE THE COMMENTS I MADE)
+#########################################################################################################
+
+# create a visualisation (some roles earn a lot of salary, creating an outlier e.g., vice-president)
+
+my_plot_salary <- black_saber_current_employees_cleaned %>% 
+  ggplot(aes(x = salary)) +
+  geom_histogram(colour = "grey", fill = "#6C3082") +
+  theme_minimal() +
+  labs(title = "Distribution of Salary", x = "Salary ($)")
+
+my_plot_salary
+
+#########################################################################################################
+
+
+# create a visualisation (a boxplot to see if teams have systematic differences in their salary)
+#rationale is that some teams might be more important to the company (esp. bc it is a software company, software team might be more valuable to the company and thus receive higher salary, yet is fair in the sense that the Gideon wants salary based on "talent and value to the company”)
+
+my_plot_salary_by_team <- black_saber_current_employees_cleaned %>% 
+  ggplot(aes(x = team, y = salary)) +
+  geom_boxplot(colour = "grey", fill = "#6C3082") +
+  theme_minimal() +
+  labs(title = "Boxplots for Salary by Team")
+
+my_plot_salary_by_team
+#result(interpretation of the plot): There seems to be systematic difference across teams. Hence, we will include this as fixed effect.
+
+#########################################################################################################
+
+
+#exploring whether there is difference in salary by roles (there should be since higher the role, the more salary people earn). As people in high position is valuable to the company, having fixed effect in this is okay.
+my_plot_salary_by_role <- black_saber_current_employees_cleaned %>% 
+  ggplot(aes(x = role_seniority, y = salary)) +
+  geom_boxplot(colour = "grey", fill = "#6C3082") +
+  theme_minimal() +
+  labs(title = "Boxplots for Salary by roles")
+
+my_plot_salary_by_role
+#does follow the seniority trend, which is Least senior to most senior: “Entry-level”,“Junior I”,“JuniorII”,“Senior I”,“Senior II”,“Senior III”,“Manager”, “Director”,“Vicepresident”
+
+#########################################################################################################
+
+#exploring whether there is gender difference in salary
+my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>% 
+  ggplot(aes(x = gender, y = salary)) +
+  geom_boxplot(colour = "grey", fill = "#6C3082") +
+  theme_minimal() +
+  labs(title = "Boxplots for Salary by Gender")
+
+my_plot_salary_by_gender
+#result(interpretation of the plot): Gender does not seem to have fixed effect on salary. In other words, no gender bias, which is good considering EDI (but when doing model comparison, we will see whether such is true numerically)
+
+#########ONE-WAY ANOVA ON SALARY AND GENDER AS GROUP####################
+
+lmod_gender <- lm(salary ~ gender, data = black_saber_current_employees_cleaned)
+summary(lmod_gender)
+#HOWEVER, UNLIKE THE VISUALIZATION, THERE WAS A SIGNIFICANT DIFFERENCE IN GENDER! THERE MIGHT BE GENDER BIAS IN SALARY
+
+#########################################################################################################
+#MODEL FITTING
+#########################################################################################################
+
+#fitting a linear mixed model while setting financial quarter (financial_q)
+#rationale: in some quarters, the company earns a lot of money and so all employees earn more money in that quarter, but when the quarter is not good, all earn less money.
+
+salary_lmer <- lmer(salary ~ gender + team + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
+#summary(salary_lmer)
+
+salary_lmer_no_gender <- lmer(salary ~ team + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
+#summary(salary_lmer_no_gender)
+
+#THIS TEST CONFRIMS THAT THERE IS A GENDER BIAS IN SALARY
+lmtest::lrtest(salary_lmer, salary_lmer_no_gender)
+#conclusion: indeed, becuase the p-value is significant, simpler model does NOT explain better than complex model = should include gender to have better predictive ability...
+
+##############################Should employee_id also be a random intercept?#########################
+#data is inherently nested data becuase same employee's data is collected several times in different quarters.
+#HOWEVER, in some sense, employee_is is nested in financial_q (refer to week5 quiz tomatoes question). Then, we dont need to include it becuase it would be duplicate. However, this only holds when the explanatory variables are kept the same, but role_seniority changes due to promotion when financial_q changes.
+
+```
+
+
+## Informative title for section addressing a research question(PROMOTION)
+
+
+
+```{r}
+#unique(black_saber_current_employees_cleaned$financial_q) --> from '2013 Q2' to '2020 Q4'
+df_promotion1 <- black_saber_current_employees_cleaned %>%
+  mutate(employee_role = as.numeric(role_seniority)) %>%
+  select(employee_id, employee_role) %>%
+  unique()%>%
+  group_by(employee_id)%>%
+  mutate(least_seniority=min(employee_role))
+
+df_promotion2<- df_promotion1%>%
+  filter(employee_role!=least_seniority) %>%
+  mutate(promoted = 1)
+
+df_promotion <- full_join(df_promotion1, df_promotion2) 
+df_promotion <- df_promotion %>% mutate(promoted = replace_na(promoted, replace = 0))%>%
+  select(employee_id, employee_role, promoted)
+
+df_promotion <- full_join(df_promotion1, df_promotion2) %>% 
+  select(employee_id, promoted) %>% 
+  drop_na() %>% 
+  unique()
+  
+df_promotion_cleaned <- full_join(black_saber_current_employees_cleaned, df_promotion)
+```
+
+
+
 ## Informative title for section addressing a research question
 
 # Q3 
@@ -202,6 +351,9 @@ _In this section you will summarize your findings across all the research questi
 **Statsy McStatsstats**. Statsy is a senior consultant with Eminence Analytics. She specializes in data visualization. Statsy earned her Bachelor of Science, Specialist in Statistics Methods and Practice, from the University of Toronto in 2023.
 
 **Datana Scatterplot**. Datana is a junior consultant with Eminence Analytics. They specialize in reproducible analysis and statistical communication. Datana earned their Bachelor of Science, Majoring in Computer Science and Statistics from the University of Toronto in 2024.
+
+**Yoon Young Lee**. Yoon Young is a junior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
+
 
 ## Code of ethical conduct
 
