@@ -78,10 +78,7 @@ The focus of our question regarding salary was whether employees receives their 
 
 **Hiring process**
 
- - The purpose of this survey is to see whether there is gender bias throughout the hiring phase (This can be a general question). Then (as specific questions), we can see whether there is bias within algorithms AND humans (the recruiters and interviewers?). 
-
-
-
+ - Is there a gender bias throughout the hiring phase, especially phase 1 and 2 which used AI service?
 
 
 ## A Potential Gender Bias in Salary
@@ -360,13 +357,10 @@ mod4 <- glmer(promotion_count ~ gender + (1|team), family = poisson, offset = lo
 ```
 
 
-## Informative title for section addressing a research question
+## A Potential Gender Bias in Hiring Process
 
-# Q3 
-
-## data wrangling
-```{r data_analysis_hiring1}
-############################################################################################################
+```{r hiring_data_wrangling}
+#########################################################################################################
 #DATA CLEANING PART
 #########################################################################################################
 
@@ -408,10 +402,16 @@ phase1_applicants_cleaned <- phase1_applicants %>%
   mutate(gender = fct_relevel(gender, "Woman", after = 0)) %>% 
   mutate(phase1accepted_word = case_when(phase1accepted == 0 ~ "Fail",
                                          phase1accepted == 1 ~ "Pass"))
+
+phase2_applicants_cleaned <- filter(phase2_applicants_cleaned, gender != "Prefer not to say")
 ```
 
-## data visualization
-```{r data_analysis_hiring2}
+We first made variable called phaseNaccepted telling us whether an applicant pass that phase or not.
+Since our main purpose is testing whether genders of applicants gives affects to the acceptance of the phase or not, this ordinal variable will help us to make response variable to have bernoulli distribution.
+Some phases do not have information about genders of applicants, so make all phases have gender information of all applicants.
+Also, in phase 2, we can see that no one get accepted. We will omit the Prefer Not to Say gender from phase 2. 
+
+```{r hiring_visualization}
 #########################################################################################################
 #EXPLORATORY ANALYSIS
 #########################################################################################################
@@ -428,51 +428,57 @@ bar_proportion_phase1 <- ggplot(data = phase1_applicants_cleaned, aes(x = gender
   geom_bar(position = "fill") +
   scale_fill_manual(values=c("#9999CC", "#6C3082")) +
   theme_minimal() +
-  labs(title = "Boxplots for Hired Rate in Phase 1 by Gender",
-       x = "Gender", y = "Approved Proportion") +
-  theme(legend.title = element_blank())
-
-bar_proportion_phase1
+  labs(title = "Pass Rate in Phase 1 by Gender",
+       x = "Gender", y = "Approved Proportion") + 
+  theme(legend.position = "none")
 
 bar_proportion_phase2 <- ggplot(data = phase2_applicants_cleaned, aes(x = gender, fill = phase2accepted_word)) +
   geom_bar(position = "fill") +
   scale_fill_manual(values=c("#9999CC", "#6C3082")) +
   theme_minimal() +
-  labs(title = "Boxplots for Hired Rate in Phase 2 by Gender",
+  labs(title = "Pass Rate in Phase 2 by Gender",
        x = "Gender", y = "Approved Proportion") +
   theme(legend.title = element_blank())
 
-bar_proportion_phase2
+bar_proportion_phase1_2 <- arrangeGrob(bar_proportion_phase1, bar_proportion_phase2, ncol=2)
+ggsave(file="images/hiring_barchart_gender.png", bar_proportion_phase1_2)
 
-  ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_1)) +
+box_interviewer1 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_1)) +
   geom_boxplot() +
+  ylim(55, 95) +
   theme_minimal() +
-  labs(title = "Boxplots for rating from interviewer 1 by Gender", x = "Gender", y= "rating")
+  labs(title = "interviewer1 scores by Gender", x = "Gender", y= "rating") +
+  theme(plot.title = element_text(hjust = 0.5))
   
-  ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_2)) +
+box_interviewer2 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_2)) +
   geom_boxplot() +
+  ylim(55, 95) +
   theme_minimal() +
-  labs(title = "Boxplots for rating from interviewer 2 by Gender", x = "Gender", y= "rating")
+  labs(title = "interviewer2 scores by Gender", x = "Gender", y= "rating") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+box_proportion_interviewer1_2 <- arrangeGrob(box_interviewer1, box_interviewer2, ncol=2)
+ggsave(file="images/hiring_boxplot_gender.png", box_proportion_interviewer1_2)
 ```
 
 Nearly half (50.7%) of our 613 applicants are females. 
+
+![](images/hiring_barchart_gender.png)
 
 The proportions of applicants who are accepted in phase 1 has similar proportion between male and female. We can see 25% of difference in the the accepted rate in phase 1 with the applicants who prefer not to say their gender, so we will see more detaily by models.
 Remind that this is proportion so the proportion depends on the number of the applicants. We have only 11 Prefer not to say applicants, which is 2% of whole applicants. 
 
 In phase2, we can see male has slightly higher percentage than female. However, the number of people who accepted in phase 2 has small proportion(7%), so we need to be careful for the difference. 
 
-In phase 3, interviewer 1 gives 
+![](images/hiring_boxplot_gender.png)
 
-## modeling
+In phase 3, interviewer 1 and 2 gives similar range of grades to an interview. Even though there are slight mean difference between male and female for interviewer 2, it is just 2.5 points difference so we can assume that gender does not give effect to the interview score.
 
-We do not know how AI make grade for each applicants but AI will consider all the variables, so we put all variables as fixed effects. 
-Response variable follows bernoulli, which is passed each phase or not. Therefore as use logit link function, we can assume that there is a linear relationship between the transformed response and explanatory variables. 
-We can assume that information of each applicants are independent. 
-Therefore we used generalized mixed model.
+```{r hiring_model_phase_1}
+#########################################################################################################
+#MODEL FITTING
+#########################################################################################################
 
-### phase 1
-```{r data_analysis_hiring}
 #use generalized linear model since all variables take large part of grades
 
 #model where gender is only predictor
@@ -490,47 +496,60 @@ drop_in_deviance <- anova(phase1_glm_no_gender, phase1_glm, test = "Chisq")
 drop_in_deviance
 ```
 
+We do not know how AI make grade for each applicants but AI will consider all the variables, so we put all variables as fixed effects. 
+Response variable follows bernoulli, which is passed each phase or not. Therefore as use logit link function, we can assume that there is a linear relationship between the transformed response and explanatory variables. 
+We can assume that information of each applicants are independent. 
+Therefore we used generalized mixed model.
+
 In initial model, where gender is our only predictor, confidence interval of all genders includes 0. Therefore at the 95% confidence level, it is believable that female applicants and male applicants with applicants who prefer not to say gender have the same log odds of accepted by AI in phase 1. We will see more carefully that AI is biased with gender with other variables in phase 1.
 
 In the models with all other variables, the deviance test tells us that it is not preferable that adding gender as an indicator variable to the model. The deviance difference between models with gender and without gender is 1.21, which is pretty small. Also, the large p-value also supports that adding new indicator variable, which is gender, to the model with all the other variables is not helpful.
 
-### phase 2
-```{r}
-#use generalized linear model since all variables take large part of grades
-
-#In model0, cannot see significant p-value 
+```{r hiring_model_phase_2}
 #model where gender is only predictor
 phase2_gender <- glm(phase2accepted ~ gender, family = binomial, data = phase2_applicants_cleaned)
 confint(phase2_gender)
 
+#generalized linear model with all variables except for gender
 phase2_glm_no_gender <- glm(phase2accepted ~ technical_skills + writing_skills + speaking_skills + leadership_presence , family = binomial(link = "logit"), data = phase2_applicants_cleaned)
 
+#generalized linear model with all variables including gender
 phase2_glm <- glm(phase2accepted ~ technical_skills + writing_skills + speaking_skills + leadership_presence + gender, family = binomial(link = "logit"), data = phase2_applicants_cleaned)
 
+#deviance test to know including gender is better
 drop_in_deviance <- anova(phase2_glm_no_gender, phase2_glm, test = "Chisq")
 drop_in_deviance
 ```
 
+Similar as phase 1, we can see that there are small deviance(0.62) and large p-value(0.43) in deviance test. Therefore adding gender to the model does not explain acceptance of applicants in phase 2. 
 
+```{r hiring_model_phase_3}
+#Simple linear model with gender covariate for interviewer 1
+phase3_interviewer1 <- lm(interviewer_rating_1 ~ gender, data = phase3_applicants_cleaned)
+confint(phase3_interviewer1)
 
-### phase 3
-```{r}
-phase3_interviewer1_no_gender <- glm(interviewer_rating_1 ~ 1, data = phase3_applicants_cleaned)
-phase3_interviewer1 <- glm(interviewer_rating_1 ~ gender, data = phase3_applicants_cleaned)
-anova(phase3_interviewer1_no_gender, phase3_interviewer1, test = "Chisq")
+#Simple linear model with gender covariate for interviewer 2
+phase3_interviewer2 <- lm(interviewer_rating_2 ~ gender, data = phase3_applicants_cleaned)
+confint(phase3_interviewer2)
 
-phase3_interviewer2_no_gender <- glm(interviewer_rating_2 ~ 1, data = phase3_applicants_cleaned)
-phase3_interviewer2 <- glm(interviewer_rating_2 ~ gender, data = phase3_applicants_cleaned)
-anova(phase3_interviewer2_no_gender, phase3_interviewer2, test = "Chisq")
+#Checking assumption
+plot(phase3_interviewer1)
+plot(phase3_interviewer2)
 ```
 
-The deviance test tells us that it is not preferable that adding gender as an indicator variable to the model. The deviance difference between models with gender and without gender is 0.23, which is pretty small. Even though the p-value is not that big, we can still say model with gender does not gives better prediction for hiring results in the interview in phase 3.
+We will use simple linear regression model in phase 3. We have one fixed effects, which is interview rating and gender. we can assume interview rate is related to gender linearly. By residuals and fitted value plot we can see the mean of the erros is 0. Also, standardized residuals and fitted value graph shows us the errors are homoscedastic. And obviously, the errors are uncorrelated.
+
+From confidence interval, we can see the coefficients of gender contains 0, so we can say interviewers are not biased by gender. In other words, gender does not give effect to interview scores.
 
 ## Discussion
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
 
+In hiring process, we can find that both AI and human are not biased with gender. Specifically, we found that applicants will not be affected by gender from AI when AI decide the applicant is pass to phase or not in generalized linear model. Also, the grade of interview will not be affected by gender from interviewer in simple linear model.
+
 ### Strengths and limitations
+
+One limitation with making models in hiring process is that we do not know score calculation function of AI and standard of passing the phase. If we know the process of score calculation, we can know what effects are correlated, and make better model with interaction terms. Same for interview score, if we can get the interview score sheet, we can know score of single interview question is biased with gender or not.
 
 \newpage
 # Consultant information
@@ -542,6 +561,7 @@ _In this section you will summarize your findings across all the research questi
 
 **Woolim Kim**. Woolim is a junior data analyst with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
 
+**Hojung Kim**. Hojung is a junior data analyst with KoCad. He specializes in mathematical statistics and statistical communication. Hojung earned his Bachelor of Science, Majoring in Statistics and Mathematics from the University of Toronto in 2022.
 
 ## Code of ethical conduct
 
