@@ -223,28 +223,6 @@ In conclusion, there is a gender bias in salary since gender improves salary pre
 ## Informative title for section addressing a research question(PROMOTION)
 
 ```{r}
-#unique(black_saber_current_employees_cleaned$financial_q) --> from '2013 Q2' to '2020 Q4'
-df_promotion1 <- black_saber_current_employees_cleaned %>%
-  mutate(employee_role = as.numeric(role_seniority)) %>%
-  select(employee_id, employee_role) %>%
-  unique()%>%
-  group_by(employee_id)%>%
-  mutate(least_seniority=min(employee_role))
-
-df_promotion2<- df_promotion1%>%
-  filter(employee_role!=least_seniority) %>%
-  mutate(promoted = 1)
-
-df_promotion <- full_join(df_promotion1, df_promotion2) 
-df_promotion <- df_promotion %>% mutate(promoted = replace_na(promoted, replace = 0))%>%
-  select(employee_id, employee_role, promoted)
-
-df_promotion <- full_join(df_promotion1, df_promotion2) %>% 
-  select(employee_id, promoted) %>% 
-  drop_na() %>% 
-  unique()
-  
-df_promotion_cleaned <- full_join(black_saber_current_employees_cleaned, df_promotion)
 ############################################################################################################
 #DATA CLEANING PART
 ############################################################################################################
@@ -300,7 +278,6 @@ recent_employee_data <- promotion_data %>%
 #EXPLORATORY ANALYSIS
 #########################################################################################################
 
-
 # exploring whether there is gender difference in promotion status
 
 promotion_status_by_gender <- promotion_data %>% 
@@ -308,7 +285,7 @@ promotion_status_by_gender <- promotion_data %>%
   geom_bar(position = "fill") +
   theme_minimal() +
   scale_fill_manual(values=c("#9999CC", "#6C3082")) +
-  labs(title = "Boxplots for Promotion Status by Gender")
+  labs(title = "Barplot for Promotion Status by Gender")
 
 promotion_status_by_gender
 
@@ -350,7 +327,7 @@ mod1_p_value
 # no evidence against the significant lack of fit
 
 # Should we consider to include `team` variable in the model? If so, should it be a random effect?
-promotion_model2 <- glmer(promoted ~ gender + leadership_for_level + productivity + work_period + (1 | team), family = binomial(link = "logit"), data = recent_employee_data)
+promotion_model2 <- glmer(promoted ~ gender + leadership_for_level + productivity + work_period + (1 | Team), family = binomial(link = "logit"), data = recent_employee_data)
 
 conf_int <- confint(promotion_model2)
 
@@ -365,6 +342,7 @@ knitr::kable(table)
 # we must take different working periods into account.
 
 #########################################################################################################
+
 
 ```
 
@@ -395,6 +373,45 @@ test_employee_data <- full_join(black_saber_current_employees_cleaned, test_empl
   filter(employee_role == current_role) %>% 
   select(-c(year, quarter, recent_year, recent_quarter, current_role, employee_role, initial_role))
 
+
+
+########
+# EDA
+########
+
+# proportion of different numbers of promotion
+prop.table(table(test_employee_data$promotion_count))
+
+# mean number of promotions
+mean(test_employee_data$promotion_count)
+sd(test_employee_data$promotion_count)
+
+promotion_count_plot <- test_employee_data %>% 
+  ggplot(aes(x = promotion_count)) +
+  geom_histogram(aes(y = stat(count / sum(count))), colour = "grey", fill = "#6C3082", binwidth= 1) +
+  theme_minimal() +
+  labs(title = "Distribution of Employees' Number of Promotions", x = "Number of Promotions for employees")
+
+promotion_count_plot
+
+
+promotion_count_poisson_plot <- ggplot(transform(data.frame(x=c(0:7)), y=dpois(x, lambda = mean(test_employee_data$promotion_count))), aes(x, y)) + 
+  geom_bar(stat="identity", fill = "#6C3082") + 
+  theme_minimal() +
+  labs(title = "Distribution of Poisson Model", x = "Number of Promotions")
+  
+promotion_count_poisson_plot
+
+
+promotion_count_by_gender_plot <- test_employee_data %>% 
+  ggplot(aes(x = promotion_count, fill = gender)) +
+  geom_histogram(colour = "grey", binwidth= 1) +
+  theme_minimal() +
+  labs(title = "Distribution of Employees' Number of Promotions", x = "Number of Promotions for employees") + 
+  scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC"))
+
+promotion_count_by_gender_plot
+
 # test model to see if gender, leadership level and productivity of each employee affect their number of promotions
 # (offset: account for different work periods for the employees, while allowing for counts to still be the response.)
 mod1 <- glm(promotion_count ~ gender, family = poisson, offset = log(work_period), data = test_employee_data)
@@ -405,8 +422,9 @@ mod3 <- glm(promotion_count ~ gender + leadership_for_level + productivity, fami
 
 lmtest::lrtest(mod1, mod2, mod3)
 round(coef(summary(mod1)),4)
+round(confint(mod1),4)
 
-mod4 <- glmer(promotion_count ~ gender + (1|team), family = poisson, offset = log(work_period), data = test_employee_data)
+mod4 <- glmer(promotion_count ~ gender + (1|Team), family = poisson, offset = log(work_period), data = test_employee_data)
 # mod4 suggests that having the random effect for `team` may be meaningless since the random effect is very small.
 
 
