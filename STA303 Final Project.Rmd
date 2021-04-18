@@ -256,16 +256,13 @@ promoted_only_data <- role_seniority_data%>%
 # replace NA's in the `promoted` column with 0
 promotion_data <- full_join(black_saber_current_employees_cleaned, promoted_only_data) %>%
   select(-c(employee_role, initial_role, current_role)) %>% 
-  mutate(promoted = replace_na(promoted, 0)) %>% 
-  mutate(leadership_score = case_when(leadership_for_level=="Needs improvement" ~ 0,
-                                 leadership_for_level=="Appropriate for level" ~ 1,
-                                 leadership_for_level=="Exceeds expectations" ~ 2))
+  mutate(promoted = replace_na(promoted, 0))
 
-# count how many financial quarters each employee has gone through
+# `work_period` variable counts how many financial quarters each employee has gone through
 # this gives us an idea of how long each employee has been working at the company
 working_period <- black_saber_current_employees_cleaned %>%
   group_by(employee_id) %>%
-  summarise(financial_q_count = n())
+  summarise(work_period = n())
 
 # combined promotion_data and working_period
 promotion_data <- full_join(promotion_data, working_period)
@@ -302,7 +299,7 @@ promotion_status_by_gender
 # exploring whether there is a difference in promotion status according to working period
 
 promotion_status_by_working_period <- promotion_data %>% 
-  ggplot(aes(x = financial_q_count, fill = as.factor(promoted))) +
+  ggplot(aes(x = work_period, fill = as.factor(promoted))) +
   geom_bar(position = "fill") +
   theme_minimal() +
   scale_fill_manual(labels = c("Never got promoted", "Got promoted at least once"),
@@ -315,7 +312,7 @@ promotion_status_by_working_period <- promotion_data %>%
 # proportion of people who have been promoted for at least once by the working period 
 # (according to the number of financial quarters spent at the company)
 promotion_status_by_working_period <- recent_employee_data %>%
-  group_by(financial_q_count) %>%
+  group_by(work_period) %>%
   summarise(count = n(), promoted_proportion = sum(promoted)/count) %>%
   select(-count) 
 
@@ -327,7 +324,7 @@ kable(promotion_status_by_working_period, caption = "Proportion of promoted empl
 #MODEL FITTING
 #########################################################################################################
 
-promotion_model1 <- glm(promoted ~ gender + leadership_for_level + productivity + financial_q_count, family = binomial(link = "logit"), data = recent_employee_data)
+promotion_model1 <- glm(promoted ~ gender + leadership_for_level + productivity + work_period, family = binomial(link = "logit"), data = recent_employee_data)
 
 summary(promotion_model1)
 
@@ -337,7 +334,7 @@ mod1_p_value
 # no evidence against the significant lack of fit
 
 # Should we consider to include `team` variable in the model? If so, should it be a random effect?
-promotion_model2 <- glmer(promoted ~ gender + leadership_for_level + productivity + financial_q_count + (1 | team), family = binomial(link = "logit"), data = recent_employee_data)
+promotion_model2 <- glmer(promoted ~ gender + leadership_for_level + productivity + work_period + (1 | team), family = binomial(link = "logit"), data = recent_employee_data)
 
 conf_int <- confint(promotion_model2)
 
@@ -355,6 +352,49 @@ knitr::kable(table)
 
 ```
 
+```{r}
+# create a variable called promotion count that keeps track of the number of times
+# each employee got promoted
+test_employee_data <- black_saber_current_employees_cleaned %>%
+  mutate(employee_role = as.numeric(role_seniority)) %>%
+  select(employee_id, employee_role) %>%
+  group_by(employee_id)%>%
+  mutate(initial_role=min(employee_role)) %>%
+  mutate(current_role=max(employee_role)) %>%
+  mutate(promotion_count = current_role - initial_role) %>%
+  select(employee_id, promotion_count) %>%
+  unique()
+
+# data that only contains the most recent (2020 Q4) information on each employee
+test_employee_data <- full_join(black_saber_current_employees_cleaned, test_employee_data) %>%
+  left_join(working_period) %>%
+  mutate(year = as.numeric(str_extract_all(financial_q, "\\d+\\d+"))) %>%
+  mutate(quarter = as.numeric(substr(financial_q,7,7))) %>% 
+  group_by(employee_id) %>%
+  mutate(recent_year = max(year)) %>%
+  filter(year == recent_year) %>%
+  mutate(recent_quarter = max(quarter)) %>%
+  filter(quarter == recent_quarter) %>%
+  right_join(y = role_seniority_data) %>% 
+  filter(employee_role == current_role) %>% 
+  select(-c(year, quarter, recent_year, recent_quarter, current_role, employee_role, initial_role))
+
+# test model to see if gender, leadership level and productivity of each employee affect their number of promotions
+# (offset: account for different work periods for the employees, while allowing for counts to still be the response.)
+mod1 <- glm(promotion_count ~ gender, family = poisson, offset = log(work_period), data = test_employee_data)
+
+mod2 <- glm(promotion_count ~ gender + leadership_for_level, family = poisson, offset = log(work_period), data = test_employee_data)
+
+mod3 <- glm(promotion_count ~ gender + leadership_for_level + productivity, family = poisson, offset = log(work_period), data = test_employee_data) 
+
+lmtest::lrtest(mod1, mod2, mod3)
+round(coef(summary(mod1)),4)
+
+mod4 <- glmer(promotion_count ~ gender + (1|team), family = poisson, offset = log(work_period), data = test_employee_data)
+# mod4 suggests that having the random effect for `team` may be meaningless since the random effect is very small.
+
+
+```
 
 
 ## Informative title for section addressing a research question
@@ -477,6 +517,7 @@ _In this section you will summarize your findings across all the research questi
 
 **Yoon Young Lee**. Yoon Young is a junior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
 
+**Guemin Kim**. Guemin is a junior data analyst with KoCad. She specializes in data analysis and statistical communication. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
 
 ## Code of ethical conduct
 
