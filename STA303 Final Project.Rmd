@@ -1,5 +1,5 @@
 ---
-title: "An Analysis of the Fairness in Hiring, Promoting, Salary Distirbuting Process in Black Saber Software"
+title: "An Analysis of the Fairness in Hiring, Promoting, Salary Distributing Process"
 subtitle: "A Special Focus on Potential Gender Bias"
 author: "Report prepared for Black Saber Software by KoCad"
 date: 2021-04-21
@@ -85,12 +85,7 @@ The focus of our question regarding salary was whether employees receives their 
 
 
 ## A Potential Gender Bias in Salary
-_For each research question, you will want to briefly describe any data manipulation, show some exploratory plots/summary tables, report on any methods you use (i.e. models you fit) and the conclusions you draw from these_
-
-We first changed the salary variable in black_saber_current_employees.csv file from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separates the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than alphabetical order. We also set woman as the baseline for gender variable so that we can make compairsons of salary and promotion by gender easily (see appendix for more information).
-
-
-
+For data wrangling, we first changed the salary variable in black_saber_current_employees.csv file from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separates the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than being in an alphabetical order. We have also set woman as the baseline for gender variable so that we can make comparisons of each of salary and promotion by gender easily.
 
 ```{r}
 ############################################################################################################
@@ -109,8 +104,7 @@ black_saber_current_employees_cleaned <- black_saber_current_employees %>%
   mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 7)) %>% 
   mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7)) %>%
   #changing the orders of gender for clairty in explanation for promotion analaysis part
-  mutate(gender = fct_relevel(gender, "Woman", after = 0)) %>%
-  rename("Team" = team) #for clean data visualization
+  mutate(gender = fct_relevel(gender, "Woman", after = 0))
 
 #NOTES
 #(Before changing): Director Entry-level Junior I Junior II Manager Senior I Senior II Senior III Vice president
@@ -119,44 +113,61 @@ black_saber_current_employees_cleaned <- black_saber_current_employees %>%
 ```
 
 
-Based on the data of current employees that we received,  leadership level, and productivity of an employee seemed to be the variables that describes the employee's value to the company. However, we also suspected that team and seniority of role will also have fixed effect on salary since based on those variables, the employee will have differential value to the company:
-For team, some team might be important and valuable to the company because Black Saber is a software company.
-For seniority of role, the higher position an employee takes, the more challenging work they have to do. 
-To figure out whether such sepculation is true, we fitted a boxplot. 
+Based on the data of current employees that we received, leadership level and productivity of an employee seemed to be the variables that shows the employee's value to the company. However, we also suspected that team and seniority of role will also have fixed effect on salary since based on those variables, the employee will have differential value to the company. For instance, some teams like software and data team, might be more valuable to the company because Black Saber is a software company. Also, for seniority of role, the higher position an employee takes, the more challenging work they have to do and thus more valuable to the company. 
 
-
+To figure out whether such speculation is true, we fitted a boxplot. 
 ```{r}
 #########################################################################################################
 #EXPLORATORY ANALYSIS
 #########################################################################################################
 # create a visualisation (a boxplot to see if teams have systematic differences in their salary)
-#rationale is that 
-
-
-#exploring whether there is difference in salary by roles and by teams.
-#there should be difference, since higher the role, the more salary people earn since they are more valuable to the company
-#andsome teams might be more important to the company 
+#some teams might be more important to the company 
 #e.g., bc it is a software company, software team might be more valuable to the company and thus receive higher salary, yet this is fair in the sense that the Gideon wants salary based on "talent and value to the company”)
 
 my_plot_salary_by_role_team <- black_saber_current_employees_cleaned %>% 
-  ggplot(aes(x = role_seniority, y = salary, color = Team)) +
-  geom_boxplot() +
+  ggplot(aes(y = salary)) +
+  facet_wrap(~team, nrow = 2) +
+  geom_boxplot(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
-  labs(title = "Boxplots for Salary by Seniority of Role", x="Role Seniority", y= "Salary($)") +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = c(0.15, 0.65)) 
+  labs(x = "Team", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Team") +
+  theme(plot.caption = element_text(hjust = 0))
 
 my_plot_salary_by_role_team
+ggsave("images/salary_boxplot_team.png", width = 6, height = 4)
 
-ggsave("images/salary_boxplot_role_team.png", width = 5, height = 3)
+```
+
+![](images/salary_boxplot_team.png)
+
+Indeed, the software and data team generally receives higher salary than other teams as we can see from Fig2. Thus, we also included team and seniority of role as predictors to a regression model.
+
+
+
+```{r}
+
+#exploring whether there is difference in salary by roles.
+#there should be difference, since higher the role, the more salary people earn since they are more valuable to the company
+
+my_plot_salary_by_role <- black_saber_current_employees_cleaned %>% 
+  ggplot(aes(x = role_seniority, y = salary)) +
+  geom_boxplot(colour = "grey", fill = "#6C3082") +
+  theme_minimal() +
+  labs(x="Role Seniority", y= "Salary($)", caption = "Figure2: Boxplots for Salary by Seniority Role")
+
+my_plot_salary_by_role
+ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
 
 #side note: does follow the seniority trend, which is Least senior to most senior: “Entry-level”,“Junior I”,“JuniorII”,“Senior I”,“Senior II”,“Senior III”,“Manager”, “Director”,“Vicepresident”
 
 ```
 
-![](images/salary_boxplot_role_team.png)
-Indeed, we see that salary significantly depends on the person's role seniority level as well as the team they are in. In particular, manager, director, vice president receives salaries significantly different from other positions, the software teams generally receives higher salary than other teams as we can see from the pink boxplots. Thus, we will also include team and seniority or role as predictors to a regression model.
 
-Below is a boxplot of whether there is a gender difference in salary. Although it does not seem to have sysemtatic difference, when we ran one-way anova setting gender as predictor and salary as response, there was a significant difference (see appendix), but we do need to consider other variables that contributes to the employee's value to the company. Thus, we will see whether a regression model with and without gender as predictor significantly differs after we fit a model and make compairson.
+
+![](images/salary_boxplot_role.png)
+
+Also, we see that salary significantly depends on the person's role seniority level as well as the team they are in. In particular, manager, director, vice president receives salaries significantly different from other positions (see Fig1). 
+
+Below is a boxplot of whether there is a gender difference in salary. Although gender does not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggests a significant difference (see appendix). However, we need to see this along with other variables related to an employee's value to the company. Thus, we will see whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
 
 ```{r}
 #########################################################################################################
@@ -171,7 +182,7 @@ my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>%
 my_plot_salary_by_gender
 #result(interpretation of the plot): Gender does not seem to have fixed effect on salary. In other words, no gender bias, which is good considering EDI (but when doing model comparison, we will see whether such is true numerically)
 
-ggsave("images/salary_boxplot_gender.png", width = 8, height = 6)
+ggsave("images/salary_boxplot_gender.png", width = 5, height = 2)
 
 #########ONE-WAY ANOVA ON SALARY AND GENDER AS GROUP####################
 
@@ -182,9 +193,7 @@ summary(lmod_gender)
 ```
 ![](images/salary_boxplot_gender.png)
 
-
-
-For a linear regression model, we chose linear mixed effects model because financial quarter will also produce sysemtatic difference, since in financial quarters where Black Saber earns a lot of money, employees will receive bonus, for instance. However, we are not interested in this variable because we only care about the employee's value and so we added this as random intercept.
+We chose a linear mixed effects model for the regression model because financial quarter will also produce sysemtatic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we are not interested in this variable because we only care about the employee's value and so we added this as a random intercept.
 
 ```{r}
 #########################################################################################################
@@ -194,19 +203,19 @@ For a linear regression model, we chose linear mixed effects model because finan
 #fitting a linear mixed model while setting financial quarter (financial_q)
 #rationale: in some quarters, the company earns a lot of money and so all employees earn more money in that quarter, but when the quarter is not good, all earn less money.
 
-salary_lmer <- lmer(salary ~ gender + Team + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
+salary_lmer <- lmer(salary ~ gender + team + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
 #summary(salary_lmer)
 
 #cannot take face-value to whether team has systematic difference and so just to check, we added this model without team so that when we compare it with salary_lmer, we can know whether we must include team or not fpre better prediction.
 salary_lmer_no_team <- lmer(salary ~ gender + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
 #summary(salary_lmer)
 
-salary_lmer_no_gender <- lmer(salary ~ Team + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
+salary_lmer_no_gender <- lmer(salary ~ team + role_seniority + leadership_for_level + productivity + (1|financial_q), data = black_saber_current_employees_cleaned)
 #summary(salary_lmer_no_gender)
 
 ```
 
-Below is the result of maximum likelihood test with and without gender as predictor. Since the p-value is significant, we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is indeed a gender bias in salary.
+Result of maximum likelihood test with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors (see appendix). Since the p-value is significant, we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is indeed a gender bias in salary.
 
 ```{r, echo=TRUE}
 #########################################################################################################
@@ -225,7 +234,7 @@ Note that we also tested whether we should include team as predictor for salary 
 lmtest::lrtest(salary_lmer, salary_lmer_no_team)
 ```
 
-In conclusion, there is a gender bias in salary since gender improves salary prediction above and beyond inclusion  of other variables, which are the factors that show the employee's value to Black Saber Software. 
+In conclusion, there is a gender bias in salary since gender improves salary prediction above and beyond inclusion  of other variables, which are the factors that show the employee's value to Black Saber Software. Moreover, such factors not only includes employee's productivity and leadership, but also the team they are in and the role they take in the company. 
 
 ## Informative title for section addressing a research question(PROMOTION)
 
@@ -344,7 +353,7 @@ lmtest::lrtest(mod1, mod2, mod3)
 round(coef(summary(mod1)),4)
 round(confint(mod1),4)
 
-mod4 <- glmer(promotion_count ~ gender + (1|Team), family = poisson, offset = log(work_period), data = test_employee_data)
+mod4 <- glmer(promotion_count ~ gender + (1|team), family = poisson, offset = log(work_period), data = test_employee_data)
 # mod4 suggests that having the random effect for `team` may be meaningless since the random effect is very small.
 
 
@@ -526,7 +535,6 @@ _In this section you will summarize your findings across all the research questi
 \newpage
 # Consultant information
 ## Consultant profiles
-
 
 **Yoon Young Lee**. Yoon Young is a junior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
 
