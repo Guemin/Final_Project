@@ -221,131 +221,11 @@ In conclusion, there is a gender bias in salary since gender improves salary pre
 
 ## Informative title for section addressing a research question(PROMOTION)
 
+
 ```{r}
 ############################################################################################################
 #DATA CLEANING PART
 ############################################################################################################
-
-# create a new variable called `employee_role` which saves role_seniority as numbers and
-# create another variable called `initial_role` that indicates the initial role of the employee
-role_seniority_data <- black_saber_current_employees_cleaned %>% 
-  mutate(employee_role = as.numeric(role_seniority)) %>%
-  select(employee_id, employee_role) %>%
-  unique()%>%
-  group_by(employee_id)%>%
-  mutate(initial_role=min(employee_role)) %>%
-  mutate(current_role=max(employee_role))
-
-# filter from the role_seniority_data to only include people with 
-# their current roles different from their initial roles
-# create a new variable called `promoted` to indicate whether the employee has been promoted 
-# from their initial role
-promoted_only_data <- role_seniority_data%>%
-  filter(current_role!=initial_role) %>%
-  mutate(promoted = 1) %>%
-  filter(current_role==employee_role)
-
-# insert `promoted` variable to the black_saber_current_employees_cleaned data
-# replace NA's in the `promoted` column with 0
-promotion_data <- full_join(black_saber_current_employees_cleaned, promoted_only_data) %>%
-  select(-c(employee_role, initial_role, current_role)) %>% 
-  mutate(promoted = replace_na(promoted, 0))
-
-# `work_period` variable counts how many financial quarters each employee has gone through
-# this gives us an idea of how long each employee has been working at the company
-working_period <- black_saber_current_employees_cleaned %>%
-  group_by(employee_id) %>%
-  summarise(work_period = n())
-
-# combined promotion_data and working_period
-promotion_data <- full_join(promotion_data, working_period)
-
-# data that only contains the most recent (2020 Q4) information on each employee
-recent_employee_data <- promotion_data %>%
-   mutate(year = as.numeric(str_extract_all(financial_q, "\\d+\\d+"))) %>%
-   mutate(quarter = as.numeric(substr(financial_q,7,7))) %>% 
-   group_by(employee_id) %>%
-   mutate(recent_year = max(year)) %>%
-   filter(year == recent_year) %>%
-   mutate(recent_quarter = max(quarter)) %>%
-   filter(quarter == recent_quarter) %>%
-   right_join(y = role_seniority_data) %>% 
-   filter(employee_role == current_role) %>% 
-   select(-c(year, quarter, recent_year, recent_quarter, current_role, employee_role, initial_role))
-
-#########################################################################################################
-#EXPLORATORY ANALYSIS
-#########################################################################################################
-
-# exploring whether there is gender difference in promotion status
-
-promotion_status_by_gender <- promotion_data %>% 
-  ggplot(aes(x = gender, fill = as.factor(promoted))) +
-  geom_bar(position = "fill") +
-  theme_minimal() +
-  scale_fill_manual(values=c("#9999CC", "#6C3082")) +
-  labs(title = "Barplot for Promotion Status by Gender")
-
-promotion_status_by_gender
-
-# exploring whether there is a difference in promotion status according to working period
-
-promotion_status_by_working_period <- promotion_data %>% 
-  ggplot(aes(x = work_period, fill = as.factor(promoted))) +
-  geom_bar(position = "fill") +
-  theme_minimal() +
-  scale_fill_manual(labels = c("Never got promoted", "Got promoted at least once"),
-                    values=c("#9999CC", "#6C3082")) +
-  labs(title = "Boxplots for Promotion Status by Working Period",
-       x = "Number of quarters spent at the company",
-       fill = "Promotion status"
-       )
-
-# proportion of people who have been promoted for at least once by the working period 
-# (according to the number of financial quarters spent at the company)
-promotion_status_by_working_period <- recent_employee_data %>%
-  group_by(work_period) %>%
-  summarise(count = n(), promoted_proportion = sum(promoted)/count) %>%
-  select(-count) 
-
-# this table could go into the appendix
-kable(promotion_status_by_working_period, caption = "Proportion of promoted employee by their working period", booktabs = TRUE, valign = "t") %>%
-  kable_styling(latex_options = "hold_position")
-
-#########################################################################################################
-#MODEL FITTING
-#########################################################################################################
-
-promotion_model1 <- glm(promoted ~ gender + leadership_for_level + productivity + work_period, family = binomial(link = "logit"), data = recent_employee_data)
-
-summary(promotion_model1)
-
-# Goodness-of-fit test for promotion_model1
-mod1_p_value <- 1 - pchisq(promotion_model1$deviance, promotion_model1$df.residual)
-mod1_p_value
-# no evidence against the significant lack of fit
-
-# Should we consider to include `team` variable in the model? If so, should it be a random effect?
-promotion_model2 <- glmer(promoted ~ gender + leadership_for_level + productivity + work_period + (1 | Team), family = binomial(link = "logit"), data = recent_employee_data)
-
-conf_int <- confint(promotion_model2)
-
-table <- cbind(round(exp(summary(promotion_model2)$coeff[,1]),2),
-               round(exp(conf_int[-1,]),2),
-               round(summary(promotion_model2)$coeff[,4], 4))
-
-colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "P-value")
-
-knitr::kable(table)
-# if we want to create a model with a response that indicates the total number of promotions for each employee,
-# we must take different working periods into account.
-
-#########################################################################################################
-
-
-```
-
-```{r}
 # create a variable called promotion count that keeps track of the number of times
 # each employee got promoted
 test_employee_data <- black_saber_current_employees_cleaned %>%
@@ -357,6 +237,22 @@ test_employee_data <- black_saber_current_employees_cleaned %>%
   mutate(promotion_count = current_role - initial_role) %>%
   select(employee_id, promotion_count) %>%
   unique()
+
+# `work_period` variable counts how many financial quarters each employee has gone through
+# this gives us an idea of how long each employee has been working at the company
+working_period <- black_saber_current_employees_cleaned %>%
+  group_by(employee_id) %>%
+  summarise(work_period = n())
+
+# create a new variable called `employee_role` which saves role_seniority as numbers and
+# create another variable called `initial_role` that indicates the initial role of the employee
+role_seniority_data <- black_saber_current_employees_cleaned %>% 
+  mutate(employee_role = as.numeric(role_seniority)) %>%
+  select(employee_id, employee_role) %>%
+  unique()%>%
+  group_by(employee_id)%>%
+  mutate(initial_role=min(employee_role)) %>%
+  mutate(current_role=max(employee_role))
 
 # data that only contains the most recent (2020 Q4) information on each employee
 test_employee_data <- full_join(black_saber_current_employees_cleaned, test_employee_data) %>%
@@ -372,11 +268,17 @@ test_employee_data <- full_join(black_saber_current_employees_cleaned, test_empl
   filter(employee_role == current_role) %>% 
   select(-c(year, quarter, recent_year, recent_quarter, current_role, employee_role, initial_role))
 
+```
+For this particular research topic on promotion, employee data that was cleaned in the previous section was used to study several potential factors that affected the company's promotion process. Each line of this data contained information of the 607 employees at the Black Saber Software.
 
+In the analysis of this research question, the response variable was the number of promotions per employee after joining the company. Since there may be some employees who have been promoted more than once, it was thought that having a Bernoulli variable (which indicates whether or not an employee has been promoted at least once) as our response would not take into account the variability in the number of promotions for each employee; therefore, we chose our response to be the number of promotions for each employee, instead.
 
-########
-# EDA
-########
+Since the main purpose of investigating this research topic was to see the potential bias present in the promotion process, we first created a new variable called `employee_role` that stores each employee's role seniority numerically to track changes in their role more easily. This variable helped us determine the initial and current roles of each employee, and the difference between the initial and current roles gave us the number of times each employee was promoted since he or she first joined the company. 
+
+```{r}
+#########################################################################################################
+#EXPLORATORY ANALYSIS
+#########################################################################################################
 
 # proportion of different numbers of promotion
 prop.table(table(test_employee_data$promotion_count))
@@ -410,7 +312,18 @@ promotion_count_by_gender_plot <- test_employee_data %>%
   scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC"))
 
 promotion_count_by_gender_plot
+```
+Starting with our response, the number of promotions, it was found that around 48.6 % of the employees at the Black Saber Software have never been promoted since they first joined the company. (promotion_count_plot illustrates the observed number of promotions for the employees from the data). The mean number of promotions recorded in the employee data was around 0.94 with a standard deviation of 1.17 and the number of promotions was highly right-skewed. However, this is not very surprising because since our response is a count, it is expected to follow a Poisson model with lambda equal to the observed mean number of promotions, and a Poisson distribution with a low mean is usually highly skewed. 
 
+Meanwhile, we were also interested in investigating whether gender bias was present in the promotion process at the Black Saber Software. According to the promotion_count_by_gender_plot, there are more female employees who have never been promoted than male employees. As the number of promotions increases, this trend is becoming more pronounced, and among those who were promoted at least once, male employees accounted for more than women.
+
+One caveat before moving to modeling is that employees who have worked for a longer period than others are more likely to be promoted at least once.
+
+
+```{r}
+#########################################################################################################
+#MODEL FITTING
+#########################################################################################################
 # test model to see if gender, leadership level and productivity of each employee affect their number of promotions
 # (offset: account for different work periods for the employees, while allowing for counts to still be the response.)
 mod1 <- glm(promotion_count ~ gender, family = poisson, offset = log(work_period), data = test_employee_data)
