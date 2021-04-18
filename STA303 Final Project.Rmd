@@ -58,8 +58,8 @@ _This part of the report is much more comprehensive than the executive summary. 
 
 ## Introduction
 
-_Provide a brief introduction to your report and outline what the report will cover. This section is valuable for setting scope and expectations. _
-The present report investigates whether employees in Black Saber Software gets hired, promoted, and receives salary by their talents and values to the company, with a special focus on gender biases exist in any of these processes. 
+Society has been discriminating against women. They received unequal opportunities to get a job and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. The present report investigated whether employees in Black Saber Software got hired, promoted, and received salary based on their values to the company and, not by discriminatory factor like gender. We first investigated whether salary was fair and not influenced by one's gender. Then, we addressed whether how many times a person got promoted is fair by investigating the relationship between factors related to employee's talent and promotion frequency. Also, we explored whether the hiring process using trialling AI was fair and whether the interviewer rated job applicants based on their talents. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement.
+
 
 
 ### Research questions
