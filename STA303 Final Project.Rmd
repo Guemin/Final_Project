@@ -21,6 +21,8 @@ library(tidyverse)
 library(lme4)
 library(mgcv)
 library(kableExtra)
+install.packages("gridExtra")
+library(gridExtra)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
 ```
