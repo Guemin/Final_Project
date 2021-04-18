@@ -535,7 +535,9 @@ phase3_interviewer2 <- lm(interviewer_rating_2 ~ gender, data = phase3_applicant
 confint(phase3_interviewer2)
 
 #Checking assumption
+par(mfrow=c(2,2))
 plot(phase3_interviewer1)
+par(mfrow=c(2,2))
 plot(phase3_interviewer2)
 ```
 
@@ -547,7 +549,11 @@ From confidence interval, we can see the coefficients of gender contains 0, so w
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
 
-In hiring process, we can find that both AI and human are not biased with gender. Specifically, we found that applicants will not be affected by gender from AI when AI decide the applicant is pass to phase or not in generalized linear model. Also, the grade of interview will not be affected by gender from interviewer in simple linear model.
+Overall, the results of statistical analyses suggest that there is a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialling AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
+
+In particular, for salary, we found that employee will be affected by gender when other explanatory variables such as productivity, leadership, and team are controlled.
+Furthermore, for promotion,number of promotion also get affected by gender when other factors such as productivity, leadership, and tenure.
+In hiring process, we can find that both AI and human are not biased with gender. Specifically, we found that applicants will not be affected by gender from AI when AI decide the applicant is pass to phase or not. Also, the grade of interview will not be affected by gender from interviewer either.
 
 ### Strengths and limitations
 
