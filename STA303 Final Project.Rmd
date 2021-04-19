@@ -16,7 +16,7 @@ titlepage-rule-color: "FFFFFF"
 titlepage-rule-height: 2
 ---
 
-```{r, message = FALSE, echo=FALSE}
+```{r, message = FALSE, echo=FALSE, warning=FALSE}
 library(tidyverse)
 library(lme4)
 library(mgcv)
@@ -58,19 +58,20 @@ _This part of the report is much more comprehensive than the executive summary. 
 
 ## Introduction
 
-Society has been discriminating against women. They received unequal opportunities to get a job and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. The present report investigated whether employees in Black Saber Software got hired, promoted, and received salary based on their values to the company and, not by discriminatory factor like gender. We first investigated whether salary was fair and not influenced by one's gender. Then, we addressed whether how many times a person got promoted is fair by investigating the relationship between factors related to employee's talent and promotion frequency. Also, we explored whether the hiring process using trialling AI was fair and whether the interviewer rated job applicants based on their talents. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement.
+Society has been discriminating against women. They received unequal opportunities to get jobs and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. The present report investigated whether employees of Black Saber Software were hired, promoted, and paid based on their value to the company, not on discriminatory factors such as gender. We first investigated whether salary was fair and not affected by one's gender. Then, we studied the relationship between promotion frequency and some potential factors, particularly focusing on identifying the presence of gender bias in the promotion process. In addition, we investigated whether the implementation of AI algorithms and the interviewers who evaluated job applicants had gender bias to explore the fairness of the recruitment process. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement.
 
 
 
 ### Research questions
 _Use bullet points to to describe the research questions you are going to address. Write in full sentences._
 
+Throughout the analysis, we focused on assessing the fairness in the hiring, promoting, and salary distributing processes at Black Saber Software. For each topic, our questions of interest were as follow:
+
+
 **Salary**
 
-The focus of our question regarding salary was whether employees receives their salary purely based on their values to the company. In particular, we were interested in:
- 
- - What factors, such as gender, team, role, leadership level, productivity, are related to increased rate of salary?
- - Whether gender has significant influence on the salary when we fit a regression model and set salary as response. This will tell us whether Black Saber Software company differentially distributes salary to employees based on their gender.
+ - What factors, such as gender, team, role, leadership level, and productivity, are related to increased rate of salary?
+ - Does gender have significant influence on the salary when we fit a regression model and set salary as response?
 
 
 **Promotion** 
@@ -80,7 +81,7 @@ The focus of our question regarding salary was whether employees receives their 
 
 **Hiring process**
 
- - Is there a gender bias throughout the hiring phase, especially phase 1 and 2 which used AI service?
+ - Are there gender biases throughout the recruitment phase, especially phase 1 and phase 2 in which AI service was implemented?
 
 
 ## A Potential Gender Bias in Salary
@@ -319,7 +320,7 @@ ggsave("images/promotion_count_by_gender_plot.png", width = 6, height = 4)
 
 Starting with our response, the number of promotions, it was found that around 48.6 % of the employees at the Black Saber Software have never been promoted since they first joined the company. (Figure3 illustrates the observed number of promotions for the employees by gender). The mean number of promotions recorded in the employee data was around 0.94 with a standard deviation of 1.17 and the number of promotions was highly right-skewed. However, this is not very surprising because since our response is a count, it is expected to follow a Poisson model with lambda equal to the observed mean number of promotions, and a Poisson distribution with a low mean is usually highly skewed. 
 
-Meanwhile, we were also interested in investigating whether gender bias was present in the promotion process at the Black Saber Software. According to the promotion_count_by_gender_plot, there are more female employees who have never been promoted than male employees. As the number of promotions increased, this trend was becoming more pronounced, and among those who were promoted at least once, male employees accounted for more than women. This trend highlighted the importance of identifying gender bias in the promotion process.
+Meanwhile, we were also interested in investigating whether gender bias was present in the promotion process at the Black Saber Software. According to Figure 3, there are more female employees who have never been promoted than male employees. As the number of promotions increased, this trend was becoming more pronounced, and among those who were promoted at least once, male employees accounted for more than women. Thus, this trend further highlighted the importance of identifying the potential gender bias present in the promotion process.
 
 ```{r}
 ########################################################################################################
@@ -343,7 +344,7 @@ Since the response was a count, a Poisson regression was used to model our data.
 4. \textbf{Linearity}  
   Since gender was not a continuous predictor, it was difficult to identify the linearity of log($\lambda$).  
   
-  
+    
 ```{r}
 #########################################################################################################
 #MODEL FITTING
