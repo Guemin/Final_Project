@@ -27,18 +27,6 @@ library(gridExtra)
 knitr::opts_chunk$set(include=FALSE)
 ```
 
-# General comments (you can delete this section)
-
-_You can delete this section, and if you want to check what it said, just open a template from the package again. You don't have to use this particular template, but you DO need to write you report in RMarkdown and include a cover page._
-
-_The cover page must have:_
-
-*	_A title and subtitle_
-* _"Report prepared for Black Saber Software by" your company name_
-*	_Date (assessment submission date is fine)_
-
-_You can change the colour of this cover to any colour you would like by replacing 6C3082 in the YAML above (line 11) to another hex code. You could use this tool to help you:_ https://htmlcolorcodes.com/color-picker/
-
 \newpage
 # Executive summary
 
@@ -52,27 +40,19 @@ _Guidelines for the executive summary:_
 
 
 \newpage
-# Technical report
-_This part of the report is much more comprehensive than the executive summary. The audience is statistics/data-minded people, but you should NOT include code or unformatted R output here._
-
-
+# Technical report  
 ## Introduction
 
 Society has been discriminating against women. They received unequal opportunities to get jobs and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. And considering this social atmosphere, our client, Black Saber Software also requested to launch an investigation on potential bias in their hiring, promoting and salary distributing processes. Using the hiring data for their new grad program and data about promotion and salary for their entire staffs, the present report investigated whether employees of Black Saber Software were hired, promoted, and paid based on their value to the company, not on discriminatory factors such as gender. First, we explored whether the employees were being paid fairly and that salary was not affected by one’s gender, using a linear mixed effects model. Then, we studied the relationship between promotion frequency and some potential factors, particularly focusing on identifying the presence of gender bias in the promotion process. Here, we used a generalized linear model with the number of promotions as the response. In addition, with a simple linear regression and generalized mixed effects models, we explored the fairness of the recruitment process by investigating whether the implementation of AI algorithms and the interviewers who evaluated job applicants had gender bias. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement. 
 
-
-
 ### Research questions
-_Use bullet points to to describe the research questions you are going to address. Write in full sentences._
 
-Throughout the analysis, we focused on assessing the fairness in the hiring, promoting, and salary distributing processes at Black Saber Software. For each topic, our questions of interest were as follow:
-
+Throughout the analysis, we focused on assessing the fairness in the hiring, promoting, and salary distributing processes at Black Saber Software. Below are our questions of interest:
 
 **Salary**
 
  - What factors, such as gender, team, role, leadership level, and productivity, are related to increased rate of salary?
  - Does gender have significant influence on the salary when we fit a regression model and set salary as response?
-
 
 **Promotion** 
 
@@ -87,7 +67,7 @@ Throughout the analysis, we focused on assessing the fairness in the hiring, pro
 ## A Potential Gender Bias in Salary  
 **\underline{Data Wrangling and Visualizations}**  
 
-For data wrangling, we first changed the salary variable in black_saber_current_employees.csv file from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separates the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than being in an alphabetical order. We have also set woman as the baseline for gender variable so that we can make comparisons of each of salary and promotion by gender easily.
+For data wrangling, we first changed the salary variable in the current employee data from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separates the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than being in an alphabetical order. We have also set woman as the baseline for gender variable so that we can make comparisons of each of salary and promotion by gender easily.
 
 ```{r}
 ############################################################################################################
@@ -114,7 +94,7 @@ black_saber_current_employees_cleaned <- black_saber_current_employees %>%
 
 ```
   
-Based on the data of current employees that we received, leadership level and productivity of an employee seemed to be the variables that shows the employee's value to the company. However, we also suspected that team and seniority of role will also have fixed effect on salary since based on those variables, the employee will have differential value to the company. For instance, some teams like software and data team, might be more valuable to the company because Black Saber is a software company. Also, for seniority of role, the higher position an employee takes, the more challenging work they have to do and thus more valuable to the company. 
+Based on the current employee data, leadership level and productivity of an employee seemed to be the variables that shows the employee's value to the company. However, we also suspected that team and seniority of role may also have fixed effect on salary since based on those variables, the employee will have differential value to the company. For instance, some teams like software and data team, might be more valuable to the company because Black Saber is a software company. Also, for seniority of role, the higher position an employee takes, the more challenging work they have to do and thus more valuable to the company. 
 
 To figure out whether such speculation is true, we fitted a boxplot. 
 ```{r}
@@ -130,11 +110,12 @@ my_plot_salary_by_role_team <- black_saber_current_employees_cleaned %>%
   facet_wrap(~team, nrow = 2) +
   geom_boxplot(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
-  labs(x = "Team", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Team") +
+  labs(x = "Team", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Team") + 
+  theme(panel.spacing = unit(2, "lines")) +
   theme(plot.caption = element_text(hjust = 0))
 
 my_plot_salary_by_role_team
-ggsave("images/salary_boxplot_team.png", width = 6, height = 4)
+ggsave("images/salary_boxplot_team.png", width = 6, height = 3.5)
 
 ```
 
@@ -153,7 +134,8 @@ my_plot_salary_by_role <- black_saber_current_employees_cleaned %>%
   ggplot(aes(x = role_seniority, y = salary)) +
   geom_boxplot(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
-  labs(x="Role Seniority", y= "Salary($)", caption = "Figure2: Boxplots for Salary by Seniority Role")
+  labs(x="Role Seniority", y= "Salary($)", caption = "Figure2: Boxplots for Salary by Seniority Role") +
+  theme(plot.caption = element_text(hjust = 0))
 
 my_plot_salary_by_role
 ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
@@ -315,7 +297,8 @@ promotion_count_by_gender_plot <- promotion_data %>%
   geom_histogram(colour = "grey", binwidth= 1) +
   theme_minimal() +
   labs(title = "Distribution of Employees' Number of Promotions", x = "Number of Promotions for employees", caption = "Figure3: Stacked histogram for Number of Promotions by Gender") + 
-  scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC"))
+  scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC")) +
+  theme(plot.caption = element_text(hjust = 0))
 
 promotion_count_by_gender_plot
 ggsave("images/promotion_count_by_gender_plot.png", width = 6, height = 4)
