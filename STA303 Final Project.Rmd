@@ -76,7 +76,7 @@ Throughout the analysis, we focused on assessing the fairness in the hiring, pro
 
 **Promotion** 
 
- - What factors, such as gender, leadership level, and productivity, are potentially affecting the number of promotions of employees at the Black Saber Software?
+ - What factors, such as gender, leadership level, salary, role and productivity, are potentially affecting the number of promotions of employees at the Black Saber Software?
  - Is the common assumption that male employees are more likely to be promoted than female employees also true at the Black Saber Software?
 
 **Hiring process**
@@ -84,7 +84,9 @@ Throughout the analysis, we focused on assessing the fairness in the hiring, pro
  - Are there gender biases throughout the recruitment phase, especially phase 1 and phase 2 in which AI service was implemented?
 
 
-## A Potential Gender Bias in Salary
+## A Potential Gender Bias in Salary  
+**\underline{Data Wrangling and Visualizations}**  
+
 For data wrangling, we first changed the salary variable in black_saber_current_employees.csv file from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separates the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than being in an alphabetical order. We have also set woman as the baseline for gender variable so that we can make comparisons of each of salary and promotion by gender easily.
 
 ```{r}
@@ -111,8 +113,7 @@ black_saber_current_employees_cleaned <- black_saber_current_employees %>%
 #(After chaning): “Entry-level”,“Junior I”,“JuniorII”,“Senior I”,“Senior II”,“Senior III”,“Manager”, “Director”,“Vicepresident” 
 
 ```
-
-
+  
 Based on the data of current employees that we received, leadership level and productivity of an employee seemed to be the variables that shows the employee's value to the company. However, we also suspected that team and seniority of role will also have fixed effect on salary since based on those variables, the employee will have differential value to the company. For instance, some teams like software and data team, might be more valuable to the company because Black Saber is a software company. Also, for seniority of role, the higher position an employee takes, the more challenging work they have to do and thus more valuable to the company. 
 
 To figure out whether such speculation is true, we fitted a boxplot. 
@@ -193,6 +194,8 @@ summary(lmod_gender)
 ```
 ![](images/salary_boxplot_gender.png)
 
+**\underline{Methods}**  
+
 We chose a linear mixed effects model for the regression model because financial quarter will also produce sysemtatic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we are not interested in this variable because we only care about the employee's value and so we added this as a random intercept.
 
 ```{r}
@@ -238,6 +241,7 @@ In conclusion, there is a gender bias in salary since gender improves salary pre
 
 ## A potential Gender Bias in Promoting Process
 
+**\underline{Data Wrangling and Visualizations}**  
 ```{r}
 ############################################################################################################
 #DATA CLEANING PART
@@ -322,6 +326,7 @@ Starting with our response, the number of promotions, it was found that around 4
 
 Meanwhile, we were also interested in investigating whether gender bias was present in the promotion process at the Black Saber Software. According to Figure 3, there are more female employees who have never been promoted than male employees. As the number of promotions increased, this trend was becoming more pronounced, and among those who were promoted at least once, male employees accounted for more than women. Thus, this trend further highlighted the importance of identifying the potential gender bias present in the promotion process.
 
+**\underline{Methods}**  
 ```{r}
 ########################################################################################################
 # Assumption check
@@ -378,8 +383,9 @@ As we were interested in studying the potential gender bias in the promoting pro
 
 The initial model contained covariates such as leadership, productivity, salary and role seniority and it was compared with another model with an additional gender predictor. With a small p-value from the drop-in-deviance test, we concluded that adding gender actually improved the model.  
 
-This table indicates the estimates and 95% confidence interval calculated from the final model:  
+**\underline{Results}**  
 
+This table indicates the estimates and 95% confidence interval calculated from the final model:  
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 table <- cbind(Estimate = summary(mod3)$coef[,1],
                confint(mod3))
@@ -392,8 +398,9 @@ From our model, the number of promotions for men differed significantly from tho
 On the other hand, those who preferred not to identify their gender were found to be insignificant as well as the other predictor variables with large p-values.  
 
 
-## A Potential Gender Bias in Hiring Process
+## A Potential Gender Bias in Hiring Process  
 
+**\underline{Data Wrangling and Visualizations}**  
 ```{r hiring_data_wrangling}
 #########################################################################################################
 #DATA CLEANING PART
@@ -509,6 +516,7 @@ In phase2, we can see male has slightly higher percentage than female. However, 
 
 In phase 3, interviewer 1 and 2 gives similar range of grades to an interview. Even though there are slight mean difference between male and female for interviewer 2, it is just 2.5 points difference so we can assume that gender does not give effect to the interview score.
 
+**\underline{Methods}**  
 ```{r hiring_model_phase_1}
 #########################################################################################################
 #MODEL FITTING
