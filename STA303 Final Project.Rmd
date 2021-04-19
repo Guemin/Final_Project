@@ -121,7 +121,7 @@ ggsave("images/salary_boxplot_team.png", width = 6, height = 3.5)
 
 ![](images/salary_boxplot_team.png)
 
-Indeed, the software and data team generally receives higher salary than other teams as we can see from Fig2. Thus, we also included team and seniority of role as predictors to a regression model.
+Indeed, the software and data team generally receives higher salary than other teams as we can see from Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.
 
 
 
@@ -148,9 +148,9 @@ ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
 
 ![](images/salary_boxplot_role.png)
 
-Also, we see that salary significantly depends on the person's role seniority level as well as the team they are in. In particular, manager, director, vice president receives salaries significantly different from other positions (see Fig1). 
+Also, we see that salary significantly depends on the person's role seniority level. In particular, manager, director, vice president receives salaries significantly different from other positions (see Figure 2). 
 
-Below is a boxplot of whether there is a gender difference in salary. Although gender does not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggests a significant difference (see appendix). However, we need to see this along with other variables related to an employee's value to the company. Thus, we will see whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
+We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1). Although gender does not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggests a significant difference (see Appendix). However, we need to see this along with other variables related to an employee's value to the company. Thus, we will see whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
 
 ```{r}
 #########################################################################################################
@@ -160,21 +160,20 @@ my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>%
   ggplot(aes(x = gender, y = salary)) +
   geom_boxplot() +
   theme_minimal() +
-  labs(title = "Boxplots for Salary by Gender", x = "Gender", y= "Salary($)")
+  labs(x = "Gender", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Seniority Role")
   
 my_plot_salary_by_gender
 #result(interpretation of the plot): Gender does not seem to have fixed effect on salary. In other words, no gender bias, which is good considering EDI (but when doing model comparison, we will see whether such is true numerically)
 
-ggsave("images/salary_boxplot_gender.png", width = 5, height = 2)
+ggsave("images/salary_boxplot_gender.png", width = 6, height = 4)
 
 #########ONE-WAY ANOVA ON SALARY AND GENDER AS GROUP####################
 
 lmod_gender <- lm(salary ~ gender, data = black_saber_current_employees_cleaned)
-summary(lmod_gender)
+#summary(lmod_gender)
 #HOWEVER, UNLIKE THE VISUALIZATION, THERE WAS A SIGNIFICANT DIFFERENCE IN GENDER! THERE MIGHT BE GENDER BIAS IN SALARY(we will see this in model fitting part)
 
 ```
-![](images/salary_boxplot_gender.png)
 
 **\underline{Methods}**  
 
@@ -200,7 +199,7 @@ salary_lmer_no_gender <- lmer(salary ~ team + role_seniority + leadership_for_le
 
 ```
 
-Result of maximum likelihood test with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors (see appendix). Since the p-value is significant, we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is indeed a gender bias in salary.
+Result of maximum likelihood test with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors (see Appendix). Since the p-value is significant, we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is indeed a gender bias in salary.
 
 ```{r, echo=TRUE}
 #########################################################################################################
@@ -218,6 +217,16 @@ Note that we also tested whether we should include team as predictor for salary 
 #This test confirms that we need team as predictor
 lmtest::lrtest(salary_lmer, salary_lmer_no_team)
 ```
+
+**\underline{Results}**  
+
+```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
+salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
+kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Partial Table of Coefficient Estimates for Each Gender", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+  kable_styling(latex_options = "scale_down")
+```
+
+Table1 shows that for our final model predicting salary, man receives salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's talent to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars.
 
 In conclusion, there is a gender bias in salary since gender improves salary prediction above and beyond inclusion  of other variables, which are the factors that show the employee's value to Black Saber Software. Moreover, such factors not only includes employee's productivity and leadership, but also the team they are in and the role they take in the company. 
 
@@ -323,14 +332,10 @@ mean_variance_model <- promotion_data %>%
 
 Since the response was a count, a Poisson regression was used to model our data. However, there were several assumptions that we had to check before fitting a Poisson model:  
 
-1. \textbf{Poisson Response}  
-  Since the response was a count it followed a Poisson model.  
-2. \textbf{Independence}  
-  This assumption was also met because each observation in the data contained information of different employees.  
-3. \textbf{Mean = Variance}  
-  Accounting for the fact that the number of promotions varied from 0 to 7, the discrepancies between the mean and the variance, ranging from 0.3 to 0.5, were considered small; therefore, we assumed that the assumption of variability equal to the mean was also satisfied.  
-4. \textbf{Linearity}  
-  Since gender was not a continuous predictor, it was difficult to identify the linearity of log($\lambda$).  
+1. \textbf{Poisson Response:} Since the response was a count it followed a Poisson model.  
+2. \textbf{Independence:} This assumption was also met because each observation in the data contained information of different employees.  
+3. \textbf{Mean = Variance:} Accounting for the fact that the number of promotions varied from 0 to 7, the discrepancies between the mean and the variance, ranging from 0.3 to 0.5, were considered small; therefore, we assumed that the assumption of variability equal to the mean was also satisfied.  
+4. \textbf{Linearity:} Since gender was not a continuous predictor, it was difficult to identify the linearity of log($\lambda$).  
   
     
 ```{r}
@@ -381,7 +386,7 @@ From our model, the number of promotions for men differed significantly from tho
 On the other hand, those who preferred not to identify their gender were found to be insignificant as well as the other predictor variables with large p-values.  
 
 
-## A Potential Gender Bias in Hiring Process  
+## Fairness in Hiring Process  
 
 **\underline{Data Wrangling and Visualizations}**  
 ```{r hiring_data_wrangling}
@@ -601,6 +606,13 @@ _This section should be fairly short, no more than half a page. Assume a general
 
 * _Make at least three relevant statements about your company’s approach to ethical statistical consulting. These should be appropriately in line with professional conduct advice like the (Statistical Society of Canada Code of Conduct)[https://ssc.ca/sites/default/files/data/Members/public/Accreditation/ethics_e.pdf] or the (Ethical Guidelines for Statistical Practice from the American Statistical Society)[https://www.amstat.org/ASA/Your-Career/Ethical-Guidelines-for-Statistical-Practice.aspx]. For example, "the customer is always right" ISN’T the type of thing an ethical statistical consultant would include._
 *	_Be very careful not to just copy and paste from these other documents! Put things in your own words._
+
+
+# Appendix
+
+
+![](images/salary_boxplot_gender.png)
+
 
 
 __Final advice: KNIT EARLY AND OFTEN!__
