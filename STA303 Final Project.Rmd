@@ -42,19 +42,17 @@ _Guidelines for the executive summary:_
 \newpage
 # Technical report  
 ## Introduction
-
 Society has been discriminating against women. They received unequal opportunities to get jobs and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. And considering this social atmosphere, our client, Black Saber Software also requested to launch an investigation on potential bias in their hiring, promoting and salary distributing processes. Using the hiring data for their new grad program and data about promotion and salary for their entire staffs, the present report investigated whether employees of Black Saber Software were hired, promoted, and paid based on their value to the company, not on discriminatory factors such as gender. First, we explored whether the employees were being paid fairly and that salary was not affected by one’s gender, using a linear mixed effects model. Then, we studied the relationship between promotion frequency and some potential factors, particularly focusing on identifying the presence of gender bias in the promotion process. Here, we used a generalized linear model with the number of promotions as the response. In addition, with a simple linear regression and generalized mixed effects models, we explored the fairness of the recruitment process by investigating whether the implementation of AI algorithms and the interviewers who evaluated job applicants had gender bias. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement. 
 
 ### Research questions
-
 Throughout the analysis, we focused on assessing the fairness in the hiring, promoting, and salary distributing processes at Black Saber Software. Below are our questions of interest:
 
 **Salary**
 
- - What factors, such as gender, team, role, leadership level, and productivity, are related to increased rate of salary?
+ - What factors, such as gender, team, role, leadership level, and productivity, are related to increased rate of salary?  
  - Does gender have significant influence on the salary when we fit a regression model and set salary as response?
 
-**Promotion** 
+**Promotion**
 
  - What factors, such as gender, leadership level, salary, role and productivity, are potentially affecting the number of promotions of employees at the Black Saber Software?
  - Is the common assumption that male employees are more likely to be promoted than female employees also true at the Black Saber Software?
@@ -115,13 +113,13 @@ my_plot_salary_by_role_team <- black_saber_current_employees_cleaned %>%
   theme(plot.caption = element_text(hjust = 0))
 
 my_plot_salary_by_role_team
-ggsave("images/salary_boxplot_team.png", width = 6, height = 3.5)
+ggsave("images/salary_boxplot_team.png", width = 6, height = 4)
 
 ```
 
 ![](images/salary_boxplot_team.png)
 
-Indeed, the software and data team generally receives higher salary than other teams as we can see from Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.
+Indeed, the software and data team generally receives higher salary than other teams as we can see from Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.  
 
 
 
@@ -375,17 +373,16 @@ The initial model contained covariates such as leadership, productivity, salary 
 
 **\underline{Results}**  
 
-This table indicates the estimates and 95% confidence interval calculated from the final model:  
+This table shows the estimates and 95% confidence interval for Gender variable, calculated from the final model:
+  
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 table <- cbind(Estimate = summary(mod3)$coef[,1],
                confint(mod3))
-kable(round(table,4), caption = "Estimates with 95% confidence intervals", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(table[1:3,],4), caption = "Partial Table of Coefficient Estimates and 95% Confidence Interval for Gender in the Final Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
-From our model, the number of promotions for men differed significantly from those of women. Specifically, the promotion rate per one work period (recorded in number of quarters) for male employees was nearly 1.38 times greater than that of females, assuming that other predictors were fixed. In other words, there was really a gender bias in the promoting process at the Black Saber Software.  
-
-On the other hand, those who preferred not to identify their gender were found to be insignificant as well as the other predictor variables with large p-values.  
+From the summary of the model, only the p-value for male employees was found to be significant^[The full table of the estimates and 95 % confidence interval for the model is included in the Appendix]. Also, considering that the 95% confidence interval for male employees does not contain 0, there is evidence against the hypothesis that there is no difference in promotion frequency between men and women (which was our baseline for gender). Specifically, Table 2 suggests that the promotion rate per financial quarter for male employees was nearly 1.38 times greater than that of females, after controlling for other predictors. In other words, a gender bias was actually present in the promoting process at the Black Saber Software.  
 
 
 ## Fairness in Hiring Process  
@@ -609,6 +606,7 @@ _This section should be fairly short, no more than half a page. Assume a general
 * _Make at least three relevant statements about your company’s approach to ethical statistical consulting. These should be appropriately in line with professional conduct advice like the (Statistical Society of Canada Code of Conduct)[https://ssc.ca/sites/default/files/data/Members/public/Accreditation/ethics_e.pdf] or the (Ethical Guidelines for Statistical Practice from the American Statistical Society)[https://www.amstat.org/ASA/Your-Career/Ethical-Guidelines-for-Statistical-Practice.aspx]. For example, "the customer is always right" ISN’T the type of thing an ethical statistical consultant would include._
 *	_Be very careful not to just copy and paste from these other documents! Put things in your own words._
 
+- KoCad acknowledges the statisticans' responsibility of manipulating data, analyzing data, and interpreting the result of analysis in a transparent way. KoCad promises not to manipulate data in a way that will introduce bias, in order to create a significant result. KoCad approaches the analysis with the appropriate model for the given data and not by the model that we want. KoCad communicates the results in a manner that considers indiviudal differences in beliefs, opinions, and background.
 
 # Appendix
 
@@ -616,9 +614,17 @@ _This section should be fairly short, no more than half a page. Assume a general
 ![](images/salary_boxplot_gender.png)
 
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
+# full summary output for salary model
 salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
 kable(round(salary_table[,],4), col.names = c("Estimate"), caption = "Full Table of Coefficient Estimates for Salary Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
+
+# full summary output and 95% CIs for promotion model
+promotion_table <- cbind(Estimate = summary(mod3)$coef[,1],
+               confint(mod3))
+kable(round(table,4), caption = "Estimates with 95% confidence intervals", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+  kable_styling(latex_options = "scale_down")
 ```
+
 
 __Final advice: KNIT EARLY AND OFTEN!__
