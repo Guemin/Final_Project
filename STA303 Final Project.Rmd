@@ -160,7 +160,9 @@ my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>%
   ggplot(aes(x = gender, y = salary)) +
   geom_boxplot() +
   theme_minimal() +
-  labs(x = "Gender", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Seniority Role")
+  labs(x = "Gender", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Seniority Role") +
+  theme(plot.caption = element_text(hjust = 0))
+
   
 my_plot_salary_by_gender
 #result(interpretation of the plot): Gender does not seem to have fixed effect on salary. In other words, no gender bias, which is good considering EDI (but when doing model comparison, we will see whether such is true numerically)
@@ -177,7 +179,7 @@ lmod_gender <- lm(salary ~ gender, data = black_saber_current_employees_cleaned)
 
 **\underline{Methods}**  
 
-We chose a linear mixed effects model for the regression model because financial quarter will also produce sysemtatic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we are not interested in this variable because we only care about the employee's value and so we added this as a random intercept.
+We chose a linear mixed effects model for the regression model because financial quarter will also produce sysematic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we are not interested in this variable because we only care about the employee's value. Further, statistically speaking, employees' salaries were sampled across various financial quarter and so this would violate the independence assumption for observations. Thus, it was important to add financial quarter as a random intercept.
 
 ```{r}
 #########################################################################################################
@@ -199,7 +201,7 @@ salary_lmer_no_gender <- lmer(salary ~ team + role_seniority + leadership_for_le
 
 ```
 
-Result of maximum likelihood test with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors (see Appendix). Since the p-value is significant, we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is indeed a gender bias in salary.
+Results of the maximum likelihood test comparing models with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors was significant (see Appendix). The significant p-value shows that we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is a gender bias in salary.
 
 ```{r, echo=TRUE}
 #########################################################################################################
@@ -222,13 +224,13 @@ lmtest::lrtest(salary_lmer, salary_lmer_no_team)
 
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
-kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Partial Table of Coefficient Estimates for Each Gender", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Partial Table of Coefficient Estimates for Salary Model Including Gender", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
-Table1 shows that for our final model predicting salary, man receives salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's talent to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars.
+Table1 shows that for our final model predicting salary, man receives salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's talent to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars. For full information about coefficient estimates for the final model for salary, please see Table1 in the Appendix.
 
-In conclusion, there is a gender bias in salary since gender improves salary prediction above and beyond inclusion  of other variables, which are the factors that show the employee's value to Black Saber Software. Moreover, such factors not only includes employee's productivity and leadership, but also the team they are in and the role they take in the company. 
+In conclusion, there is a gender bias in salary since gender improves salary prediction above and beyond inclusion of other variables, which are the factors that show the employee's value to Black Saber Software. Moreover, such factors not only includes employee's productivity and leadership, but also the team they are in and the role they take in the company. 
 
 ## A potential Gender Bias in Promoting Process
 
@@ -613,6 +615,10 @@ _This section should be fairly short, no more than half a page. Assume a general
 
 ![](images/salary_boxplot_gender.png)
 
-
+```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
+salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
+kable(round(salary_table[,],4), col.names = c("Estimate"), caption = "Full Table of Coefficient Estimates for Salary Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+  kable_styling(latex_options = "scale_down")
+```
 
 __Final advice: KNIT EARLY AND OFTEN!__
