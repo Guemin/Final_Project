@@ -49,12 +49,12 @@ Throughout the analysis, we focused on assessing the fairness in the hiring, pro
 
 **Salary**
 
- - What factors, such as gender, team, role, leadership level, and productivity, are related to increased rate of salary?  
- - Does gender have significant influence on the salary when we fit a regression model and set salary as response?
+ - What factors, such as gender, team, role, leadership level, and productivity, are related to increased rate of salary?
+ - Does gender have significant influence on the salary?
 
 **Promotion**
 
- - What factors, such as gender, leadership level, salary, role and productivity, are potentially affecting the number of promotions of employees at the Black Saber Software?
+ - What are some potential factors affecting the number of promotions of employees?
  - Is the common assumption that male employees are more likely to be promoted than female employees also true at the Black Saber Software?
 
 **Hiring process**
@@ -113,15 +113,11 @@ my_plot_salary_by_role_team <- black_saber_current_employees_cleaned %>%
   theme(plot.caption = element_text(hjust = 0))
 
 my_plot_salary_by_role_team
-ggsave("images/salary_boxplot_team.png", width = 6, height = 4)
+ggsave("images/salary_boxplot_team.png", width = 6, height = 3.8)
 
 ```
-
 ![](images/salary_boxplot_team.png)
-
-Indeed, the software and data team generally receives higher salary than other teams as we can see from Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.  
-
-
+Indeed, the software and data teams generally receive higher salary than other teams as shown in Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.  
 
 ```{r}
 
@@ -148,7 +144,7 @@ ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
 
 Also, we see that salary significantly depends on the person's role seniority level. In particular, manager, director, vice president receives salaries significantly different from other positions (see Figure 2). 
 
-We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1). Although gender does not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggests a significant difference (see Appendix). However, we need to see this along with other variables related to an employee's value to the company. Thus, we will see whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
+We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1). Although gender does not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggests a significant difference. However, we need to see this along with other variables related to an employee's value to the company. Thus, we will see whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
 
 ```{r}
 #########################################################################################################
