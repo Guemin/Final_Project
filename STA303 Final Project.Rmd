@@ -296,7 +296,7 @@ promotion_count_by_gender_plot <- promotion_data %>%
   ggplot(aes(x = promotion_count, fill = gender)) +
   geom_histogram(colour = "grey", binwidth= 1) +
   theme_minimal() +
-  labs(title = "Distribution of Employees' Number of Promotions", x = "Number of Promotions for employees", caption = "Figure3: Stacked histogram for Number of Promotions by Gender") + 
+  labs(x = "Number of Promotions for employees", caption = "Figure3: Distribution of Employees' Number of Promotions by Gender") + 
   scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC")) +
   theme(plot.caption = element_text(hjust = 0))
 
