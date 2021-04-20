@@ -487,7 +487,7 @@ bar_proportion_phase1 <- ggplot(data = phase1_applicants_cleaned, aes(x = gender
   theme_minimal() +
   labs(x = "Gender", y = "Approved Proportion") + 
   ggtitle("a) Phase 1") +
-  theme(legend.position = "none", plot.title = element_text(size=12))
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5, size=12))
 
 bar_proportion_phase2 <- ggplot(data = phase2_applicants_cleaned, aes(x = gender, fill = phase2accepted_word)) +
   geom_bar(position = "fill") +
@@ -495,7 +495,7 @@ bar_proportion_phase2 <- ggplot(data = phase2_applicants_cleaned, aes(x = gender
   theme_minimal() +
   labs(x = "Gender", y = "Approved Proportion") + 
   ggtitle("b) Phase 2") + 
-  theme(legend.title = element_blank(), plot.title = element_text(size=12))
+  theme(legend.title = element_blank(), plot.title = element_text(hjust = 0.5, size=12))
 
 bar_proportion_phase1_2 <- grid.arrange(bar_proportion_phase1,bar_proportion_phase2, ncol = 2,
                                         bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in (a) Phase 1 and (b) Phase 2 by Gender", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
@@ -522,11 +522,11 @@ ggsave(file="images/hiring_boxplot_gender.png", box_proportion_interviewer1_2, h
 
 ## figure for excutive summary
 bar_proportion_phase1_2_exc <- grid.arrange(bar_proportion_phase1,bar_proportion_phase2, ncol = 2,
-                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in (a) Phase 1 and (b) Phase 2 by Gender", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 8.5)))
+                                        bottom = textGrob("Figure 2: Proportion of Applicants who Passed/Failed in (a) Phase 1 and (b) Phase 2 by Gender", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 8.5)))
 ggsave(file="images/hiring_barchart_gender_2.png", bar_proportion_phase1_2_exc, height = 2.35)
 
 box_proportion_interviewer1_2_exc <- grid.arrange(box_interviewer1,box_interviewer2, ncol = 2, 
-                                              bottom = textGrob("Figure 5: Distribution of Interview Scores evaluated by (a) Interviewer 1 and (b) Interviewer 2, by Gender\n\nThe horizontal line in the middle of each box represents the point separating the highest 50% interview\nscores from the lowest 50%. The horizontal lines at the top and bottom of each box represent the\nlowest 75% and 25% of the scores, respectively. The vertical lines and dots in the plot give the full range\nof values, with some extreme values further away from the middle of the box.", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 9)))
+                                              bottom = textGrob("Figure 3: Distribution of Interview Scores evaluated by (a) Interviewer 1 and (b) Interviewer 2, by Gender\n\nThe horizontal line in the middle of each box represents the point separating the highest 50% interview\nscores from the lowest 50%. The horizontal lines at the top and bottom of each box represent the\nlowest 75% and 25% of the scores, respectively. The vertical lines and dots in the plot give the full range\nof values, with some extreme values further away from the middle of the box.", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 9)))
 ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2_exc, height = 3.1)
 
 ```
@@ -678,6 +678,37 @@ kable(round(salary_table[,],4), col.names = c("Estimate"), caption = "Full Table
 promotion_table <- cbind(Estimate = summary(mod3)$coef[,1],
                confint(mod3))
 kable(round(table,4), caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Promotion Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+  kable_styling(latex_options = "scale_down")
+
+
+# full summary output for hiring model
+phase1_table <- cbind(Estimate = summary(phase1_glm_no_gender)$coef[,1], 
+                      confint(phase1_glm_no_gender))
+kable(round(phase1_table,4), 
+      caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Hiring Phase 1 Model", 
+      booktabs = TRUE, 
+      valign = "t", 
+      format = "pandoc") %>%
+  kable_styling(latex_options = "scale_down")
+
+phase2_table <- cbind(Estimate = summary(phase2_glm_no_gender)$coef[,1], 
+                      confint(phase2_glm_no_gender))
+kable(round(phase2_table,4), 
+      caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Hiring Phase 2 Model", 
+      booktabs = TRUE, 
+      valign = "t", 
+      format = "pandoc") %>%
+  kable_styling(latex_options = "scale_down")
+
+phase3_table_1 <- cbind(confint(phase3_interviewer1))
+phase3_table_2 <- cbind(confint(phase3_interviewer2))
+phase3_table <- rbind(phase3_table_1, phase3_table_2)
+rownames(phase3_table) <- c("(Intercept_1)", "genderMan_1", "(Intercept_2)", "genderMan_2")
+kable(round(phase3_table,4), 
+      caption = "Full Table of 95% Confidence Intervals for Hiring Phase 3 Model", 
+      booktabs = TRUE, 
+      valign = "t",
+      format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
