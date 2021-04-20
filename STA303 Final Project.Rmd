@@ -30,14 +30,38 @@ knitr::opts_chunk$set(include=FALSE)
 \newpage
 # Executive summary
 
-_Guidelines for the executive summary:_
+## Background & Aim
+The report was conducted by KoCad for the STA 303 project to investigate the potential bias in the hiring and remuneration processes at the Black Saber Software company.
+Focusing on three different sectors, we have evaluated whether salary levels were fair and not influenced by one’s gender. We then addressed the fairness in how many times a person got promoted through investigating the relationship between factors related to the employee’s talent and their respective promotion frequency. Lastly, we explored whether the hiring process using trialing AI was fair and whether the interviewer rated job applicants based on their talents.
 
-* _No more than two pages_
-* _Language is appropriate for a non-technical audience_
-* _Bullet points are used where appropriate_
-*	_A small number of key visualizations and/or tables are included_
-*	_All three research questions are addressed_
+## Key findings
+- Male employees’ average salary is approximately $1785.6 dollars more than female salary.
+- 48.6% of the employees at the Black Saber Software have never been promoted since they first joined the company.
+- There are more female employees who have never been promoted since they first joined the company than male employees, and as the number of promotions increases, the proportion of females who get a subsequent promotion decreases compared to males.
+- The promotion rate per financial quarter for the male employees is about 1.38 times
+greater than female employees.
+- In phase 1, the proportion of applicants who have been approved to next phase are approximately evenly split between male and female (about 50% for both male and female).
+- In phase 2, male applicants who have been approved to the interview are slightly higher than female applicants. However, the overall proportion approved in phase 2 is small (only 7%).
+- In phase 3, interviewers 1 and 2 give a similar range of grades to interview average ratings. The average rating for women is similar to men with only about a 2.5 point difference.
 
+
+## Limitations
+- The hiring process is not specified in detail, so we cannot know the standard of the AI system and how it approves the applicants.
+
+## Conclusion
+There is a gender bias in the salary distribution process and promotion process of current employees in Black Saber Software but not for the hiring process.
+
+
+\newpage
+## Figures
+![](images/promotion_count_by_gender_plot_2.png)
+*Figure 1.* Distribution of employees' number of promotion, showing genders as different colour. Each bar's height represents the count for number of promotions.
+
+![](images/hiring_barchart_gender_2.png)
+*Figure 2.* Distribution of Phase 1 and 2 applicants with approved proportion, by gender.
+
+![](images/hiring_boxplot_gender_2.png)
+*Figure 3.* The distribution of phase 3 interview ratings by gender. The horizontal line in the middle of each box represents the point separating the highest 50% interview rating from the lowest 50%. The top of the box represents 75% and the bottom of the box 25%. The lines and dots from the box give the full range of values, with some extreme values further away from the middle of the box. 
 
 \newpage
 # Technical report  
@@ -307,6 +331,18 @@ promotion_count_by_gender_plot <- promotion_data %>%
 
 promotion_count_by_gender_plot
 ggsave("images/promotion_count_by_gender_plot.png", width = 6, height = 4)
+
+## Figure for executive summary
+promotion_count_by_gender_plot_2 <- promotion_data %>% 
+  ggplot(aes(x = promotion_count, fill = gender)) +
+  geom_histogram(colour = "grey", binwidth= 1) +
+  theme_minimal() +
+  labs(x = "Number of Promotions for employees") + 
+  scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC")) +
+  theme(plot.caption = element_text(hjust = 0))
+
+ggsave("images/promotion_count_by_gender_plot_2.png", height = 2)
+
 ```
 ![](images/promotion_count_by_gender_plot.png)
 
@@ -468,6 +504,7 @@ bar_proportion_phase2 <- ggplot(data = phase2_applicants_cleaned, aes(x = gender
 bar_proportion_phase1_2 <- arrangeGrob(bar_proportion_phase1, bar_proportion_phase2, ncol=2)
 ggsave(file="images/hiring_barchart_gender.png", bar_proportion_phase1_2)
 
+
 box_interviewer1 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_1)) +
   geom_boxplot() +
   ylim(55, 95) +
@@ -484,6 +521,11 @@ box_interviewer2 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interv
 
 box_proportion_interviewer1_2 <- arrangeGrob(box_interviewer1, box_interviewer2, ncol=2)
 ggsave(file="images/hiring_boxplot_gender.png", box_proportion_interviewer1_2)
+
+## figure for excutive summary
+ggsave(file="images/hiring_barchart_gender_2.png", bar_proportion_phase1_2, height = 2)
+ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2, height = 2)
+
 ```
 
 Nearly half (50.7%) of our 613 applicants are females. 
@@ -602,7 +644,16 @@ _This section should be fairly short, no more than half a page. Assume a general
 * _Make at least three relevant statements about your company’s approach to ethical statistical consulting. These should be appropriately in line with professional conduct advice like the (Statistical Society of Canada Code of Conduct)[https://ssc.ca/sites/default/files/data/Members/public/Accreditation/ethics_e.pdf] or the (Ethical Guidelines for Statistical Practice from the American Statistical Society)[https://www.amstat.org/ASA/Your-Career/Ethical-Guidelines-for-Statistical-Practice.aspx]. For example, "the customer is always right" ISN’T the type of thing an ethical statistical consultant would include._
 *	_Be very careful not to just copy and paste from these other documents! Put things in your own words._
 
+**Responsibility of Statistician**
 - KoCad acknowledges the statisticans' responsibility of manipulating data, analyzing data, and interpreting the result of analysis in a transparent way. KoCad promises not to manipulate data in a way that will introduce bias, in order to create a significant result. KoCad approaches the analysis with the appropriate model for the given data and not by the model that we want. KoCad communicates the results in a manner that considers indiviudal differences in beliefs, opinions, and background.
+
+**Responsibility to Clients**
+- KoCad cannot guarantee that the results of the analysis will be
+exactly aligned with the expectations of the client. KoCad is responsible for retaining full knowledge and understanding of statistical methods, deducing valid conclusions from the data provided, and identifying and explaining any limitations to the conclusions that can be drawn.
+
+**Responsibility to other fellow statisticians**
+- KoCad ensures a supportive working environment to fellow statisticians in their professional development. To motivate and inspire fellow professionals, questions and debate on projects are recommended. Avoiding direct criticism of the person, conflicts should be directed and resolved according to procedures. All fellow KoCad consultants are responsible to act with integrity toward others.
+
 
 # Appendix
 
