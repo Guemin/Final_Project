@@ -498,8 +498,7 @@ bar_proportion_phase2 <- ggplot(data = phase2_applicants_cleaned, aes(x = gender
   theme(legend.title = element_blank(), plot.title = element_text(size=12))
 
 bar_proportion_phase1_2 <- grid.arrange(bar_proportion_phase1,bar_proportion_phase2, ncol = 2,
-                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in Phase 1 and 2 by Gender", 
-                                                          x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
+                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in (a) Phase 1 and (b) Phase 2 by Gender", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
 ggsave(file="images/hiring_barchart_gender.png", bar_proportion_phase1_2, height = 3)
 
 
@@ -518,18 +517,16 @@ box_interviewer2 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interv
   theme(plot.title = element_text(hjust = 0.5, size = 12))
 
 box_proportion_interviewer1_2 <- grid.arrange(box_interviewer1,box_interviewer2, ncol = 2, 
-                                              bottom = textGrob("Figure 5: Distribution of Interview Scores in Phase 3 by Gender", 
-                                                                x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
+                                              bottom = textGrob("Figure 5: Distribution of Interview Scores evaluated by (a) Interviewer 1 and (b) Interviewer 2\n              by Gender", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
 ggsave(file="images/hiring_boxplot_gender.png", box_proportion_interviewer1_2, height = 3)
 
 ## figure for excutive summary
 bar_proportion_phase1_2_exc <- grid.arrange(bar_proportion_phase1,bar_proportion_phase2, ncol = 2,
-                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in Phase 1 and 2 by Gender", 
-                                                          x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 8.5)))
+                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in (a) Phase 1 and (b) Phase 2 by Gender", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 8.5)))
 ggsave(file="images/hiring_barchart_gender_2.png", bar_proportion_phase1_2_exc, height = 2.35)
 
 box_proportion_interviewer1_2_exc <- grid.arrange(box_interviewer1,box_interviewer2, ncol = 2, 
-                                              bottom = textGrob("Figure 5: Distribution of Interview Scores in Phase 3 by Gender\n\nThe horizontal line in the middle of each box represents the point separating the highest 50% interview\nscores from the lowest 50%. The horizontal lines at the top and bottom of each box represent the\nlowest 75% and 25% of the scores, respectively. The vertical lines and dots in the plot give the full range\nof values, with some extreme values further away from the middle of the box.", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 9)))
+                                              bottom = textGrob("Figure 5: Distribution of Interview Scores evaluated by (a) Interviewer 1 and (b) Interviewer 2, by Gender\n\nThe horizontal line in the middle of each box represents the point separating the highest 50% interview\nscores from the lowest 50%. The horizontal lines at the top and bottom of each box represent the\nlowest 75% and 25% of the scores, respectively. The vertical lines and dots in the plot give the full range\nof values, with some extreme values further away from the middle of the box.", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 9)))
 ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2_exc, height = 3.1)
 
 ```
