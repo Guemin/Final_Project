@@ -31,17 +31,15 @@ knitr::opts_chunk$set(include=FALSE)
 # Executive summary
 
 ## Background & Aim
-Current research was conducted by KoCad to investigate potential biases in the hiring and remuneration process at Black Saver software. In particular, we focused on studying the gender disparity issues that may exist in the company's recruitment, wage, and promotion schemes. To study the potential gender bias in salary,  we evaluated whether employees at the company were being paid fairly and that their wages were not influenced by discriminatory factors such as gender. We also investigated the relationship between the promotion frequency and  some factors, such as gender, leadership, productivity, role and salary to address the fairness of the company’s promoting system. Lastly, we investigated whether each recruitment phase that uses either an implemented AI algorithm or score ratings of the interviewers who evaluated the applicants was biased.
+Current research was conducted by KoCad to investigate potential biases as well as the gender disparity issues that may exist in the company's recruitment, wage, and promotion schemes. To study the potential gender bias in the company's salary and promoting systems, we evaluated whether employees at the company were being paid and promoted fairly and that those processes were not influenced by discriminatory factors such as gender. We also investigated whether or not any kind of bias was included in each hiring phase that uses either the AI service or the score ratings of interviewers who evaluated applicants.
 
 ## Key findings
-- Male employees’ average salary is approximately $1785.6 dollars more than female salary.
-- 48.6% of the employees at the Black Saber Software have never been promoted since they first joined the company.
-- There are more female employees who have never been promoted since they first joined the company than male employees, and as the number of promotions increases, the proportion of females who get a subsequent promotion decreases compared to males.
-- The promotion rate per financial quarter for the male employees is about 1.38 times
-greater than female employees.
-- In phase 1, the proportion of applicants who have been approved to next phase are approximately evenly split between male and female (about 50% for both male and female).
-- In phase 2, male applicants who have been approved to the interview are slightly higher than female applicants. However, the overall proportion approved in phase 2 is small (only 7%).
-- In phase 3, interviewers 1 and 2 give a similar range of grades to interview average ratings. The average rating for women is similar to men with only about a 2.5 point difference.
+- Male employees' average salary was approximately $1785.6 dollars more than that of female.
+- Among those who have never been promoted, the proportion of female employees was slightly greater than that of male employees; however, unlike the proportion of male employees that increased with the number of promotions, the proportion of female employees decreased as the number of promotions increased.
+- The promotion rate per financial quarter for the male employees was about 1.38 times greater than female employees.
+- In the first hiring phase, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
+- In phase 2, only 7% of the applicants were invited to an interview and among them, the number of male applicants were slightly greater than female applicants.
+- In phase 3, interviewers 1 and 2 gave a similar range of grades compared to the average ratings. The average rating for women was similar to that of men with a small difference of 2.5 points.
 
 ## Limitations
 - The hiring process is not specified in detail, so we cannot know the standard of the AI system and how it approves the applicants.
@@ -52,7 +50,6 @@ There is a gender bias in the salary distribution process and promotion process 
 \newpage
 ## Figures
 ![](images/promotion_count_by_gender_plot_2.png)
-*Figure 1.* Distribution of employees' number of promotion, showing genders as different colour. Each bar's height represents the count for number of promotions.
 
 ![](images/hiring_barchart_gender_2.png)
 *Figure 2.* Distribution of Phase 1 and 2 applicants with approved proportion, by gender.
@@ -334,11 +331,12 @@ promotion_count_by_gender_plot_2 <- promotion_data %>%
   ggplot(aes(x = promotion_count, fill = gender)) +
   geom_histogram(colour = "grey", binwidth= 1) +
   theme_minimal() +
-  labs(x = "Number of Promotions for employees") + 
+  labs(x = "Number of Promotions for employees",
+       caption = "Figure1: Distribution of employees' number of promotion, showing genders as different colour.\nEach bar's height represents the count for number of promotions") + 
   scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC")) +
   theme(plot.caption = element_text(hjust = 0))
 
-ggsave("images/promotion_count_by_gender_plot_2.png", height = 2)
+ggsave("images/promotion_count_by_gender_plot_2.png", height = 2.5)
 
 ```
 ![](images/promotion_count_by_gender_plot.png)
@@ -620,7 +618,11 @@ In hiring process, we can find that both AI and human are not biased with gender
 
 ### Strengths and limitations
 
-One limitation with making models in hiring process is that we do not know score calculation function of AI and standard of passing the phase. If we know the process of score calculation, we can know what effects are correlated, and make better model with interaction terms. Same for interview score, if we can get the interview score sheet, we can know score of single interview question is biased with gender or not.
+One limitation of our analysis is that the provided data did not contain information on how the company would select employees for promotion. Understanding the company’s core values or knowing more about employee promotion policies will help us indentify the right factors that affect employee promotion.
+
+Another limitation with making models in hiring process is that we do not know the evaluation criteria for each phase. If we know how score is being calculated by the implemented AI, it would be easier to identify what effects are correlated, and make better model with interaction terms. Same for interview score, if we are given with a list of interview questions and an evaluation criteria template that contains detailed components of the grading schemes, we would be able to explore potential biases in the interview phase more in depth.
+
+For future consideration of our study, we could look into salary and promotion distributions by team, role and financial quarter and identify segments with pronounced biases. This way, we will not only be able to figure out whether or not the company’s wage and promotion systems are biased but we can also find out specific teams, roles or financial quarters in which the biases are present.
 
 \newpage
 # Consultant information
@@ -651,7 +653,7 @@ exactly aligned with the expectations of the client. KoCad is responsible for re
 **Responsibility to other fellow statisticians**
 - KoCad ensures a supportive working environment to fellow statisticians in their professional development. To motivate and inspire fellow professionals, questions and debate on projects are recommended. Avoiding direct criticism of the person, conflicts should be directed and resolved according to procedures. All fellow KoCad consultants are responsible to act with integrity toward others.
 
-
+\newpage
 # Appendix
 
 
