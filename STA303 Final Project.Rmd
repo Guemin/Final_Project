@@ -31,8 +31,7 @@ knitr::opts_chunk$set(include=FALSE)
 # Executive summary
 
 ## Background & Aim
-The report was conducted by KoCad for the STA 303 project to investigate the potential bias in the hiring and remuneration processes at the Black Saber Software company.
-Focusing on three different sectors, we have evaluated whether salary levels were fair and not influenced by one’s gender. We then addressed the fairness in how many times a person got promoted through investigating the relationship between factors related to the employee’s talent and their respective promotion frequency. Lastly, we explored whether the hiring process using trialing AI was fair and whether the interviewer rated job applicants based on their talents.
+Current research was conducted by KoCad to investigate potential biases in the hiring and remuneration process at Black Saver software. In particular, we focused on studying the gender disparity issues that may exist in the company's recruitment, wage, and promotion schemes. To study the potential gender bias in salary,  we evaluated whether employees at the company were being paid fairly and that their wages were not influenced by discriminatory factors such as gender. We also investigated the relationship between the promotion frequency and  some factors, such as gender, leadership, productivity, role and salary to address the fairness of the company’s promoting system. Lastly, we investigated whether each recruitment phase that uses either an implemented AI algorithm or score ratings of the interviewers who evaluated the applicants was biased.
 
 ## Key findings
 - Male employees’ average salary is approximately $1785.6 dollars more than female salary.
@@ -44,13 +43,11 @@ greater than female employees.
 - In phase 2, male applicants who have been approved to the interview are slightly higher than female applicants. However, the overall proportion approved in phase 2 is small (only 7%).
 - In phase 3, interviewers 1 and 2 give a similar range of grades to interview average ratings. The average rating for women is similar to men with only about a 2.5 point difference.
 
-
 ## Limitations
 - The hiring process is not specified in detail, so we cannot know the standard of the AI system and how it approves the applicants.
 
 ## Conclusion
 There is a gender bias in the salary distribution process and promotion process of current employees in Black Saber Software but not for the hiring process.
-
 
 \newpage
 ## Figures
@@ -304,7 +301,7 @@ For this particular topic, employee data that was cleaned in the previous sectio
 
 For this analysis, the response variable was the number of promotions per employee after joining the company. Since there may be some employees who have been promoted more than once, it was thought that having a Bernoulli variable (which indicates whether or not an employee has been promoted at least once) as our response would not take into account the variability in different number of promotions of the employees; therefore, we chose our response to be the number of promotions, instead.
 
-Since the main purpose of investigating this research topic was to see the potential bias present in the promotion process, we first created a new variable that stored each employee's role seniority numerically rather than categorically to track changes in their role more easily. This variable helped us determine the initial and current roles of each employee, and the difference between the initial and current roles gave us the number of times each employee was promoted since he or she first joined the company. 
+Since the main purpose of investigating this research topic was to see the potential bias present in the promotion process, we first created a new variable that stored each employee's roles numerically rather than categorically to track changes in their roles more easily. This variable helped us determine the initial and current roles of each employee, and the difference between the initial and current roles gave us the number of times each employee was promoted since he or she first joined the company. 
 
 ```{r}
 #########################################################################################################
@@ -631,7 +628,7 @@ One limitation with making models in hiring process is that we do not know score
 
 **Yoon Young Lee**. Yoon Young is a junior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
 
-**Guemin Kim**. Guemin is a junior data analyst with KoCad. She specializes in machine learning and statistical communication. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
+**Guemin Kim**. Guemin is a junior data engineer with KoCad. She specializes in machine learning and statistical communication. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
 
 **Woolim Kim**. Woolim is a junior data analyst with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
 
@@ -669,7 +666,7 @@ kable(round(salary_table[,],4), col.names = c("Estimate"), caption = "Full Table
 # full summary output and 95% CIs for promotion model
 promotion_table <- cbind(Estimate = summary(mod3)$coef[,1],
                confint(mod3))
-kable(round(table,4), caption = "Estimates with 95% confidence intervals", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(table,4), caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Promotion Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
