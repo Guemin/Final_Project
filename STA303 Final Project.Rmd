@@ -23,6 +23,7 @@ library(mgcv)
 library(kableExtra)
 #install.packages("gridExtra")
 library(gridExtra)
+library(grid)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
 ```
@@ -39,23 +40,23 @@ Current research was conducted by KoCad to investigate potential biases as well 
 - The promotion rate per financial quarter for the male employees was about 1.38 times greater than female employees.
 - In the first hiring phase, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
 - In phase 2, only 7% of the applicants were invited to an interview and among them, the number of male applicants were slightly greater than female applicants.
-- In phase 3, interviewers 1 and 2 gave a similar range of grades compared to the average ratings. The average rating for women was similar to that of men with a small difference of 2.5 points.
+- In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Also, the average score for women was similar to that of men with a small difference of 2.5 in scores.
 
 ## Limitations
-- The hiring process is not specified in detail, so we cannot know the standard of the AI system and how it approves the applicants.
+The lack of information on salary determination methods, promotion policies, and evaluation criteria in the hiring process has limited our models' ability to produce more accurate results.
 
 ## Conclusion
-There is a gender bias in the salary distribution process and promotion process of current employees in Black Saber Software but not for the hiring process.
+There was a gender bias in both wage and promotion systems in Black Saber Software but not in the hiring process.
 
 \newpage
 ## Figures
+The key findings of the analysis are summarized in the following figures:  
+
 ![](images/promotion_count_by_gender_plot_2.png)
 
 ![](images/hiring_barchart_gender_2.png)
-*Figure 2.* Distribution of Phase 1 and 2 applicants with approved proportion, by gender.
 
 ![](images/hiring_boxplot_gender_2.png)
-*Figure 3.* The distribution of phase 3 interview ratings by gender. The horizontal line in the middle of each box represents the point separating the highest 50% interview rating from the lowest 50%. The top of the box represents 75% and the bottom of the box 25%. The lines and dots from the box give the full range of values, with some extreme values further away from the middle of the box. 
 
 \newpage
 # Technical report  
@@ -179,7 +180,7 @@ my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>%
 my_plot_salary_by_gender
 #result(interpretation of the plot): Gender does not seem to have fixed effect on salary. In other words, no gender bias, which is good considering EDI (but when doing model comparison, we will see whether such is true numerically)
 
-ggsave("images/salary_boxplot_gender.png", width = 6, height = 4)
+ggsave("images/salary_boxplot_gender.png", width = 6, height = 2.5)
 
 #########ONE-WAY ANOVA ON SALARY AND GENDER AS GROUP####################
 
@@ -484,42 +485,52 @@ bar_proportion_phase1 <- ggplot(data = phase1_applicants_cleaned, aes(x = gender
   geom_bar(position = "fill") +
   scale_fill_manual(values=c("#9999CC", "#6C3082")) +
   theme_minimal() +
-  labs(title = "Pass Rate in Phase 1 by Gender",
-       x = "Gender", y = "Approved Proportion") + 
-  theme(legend.position = "none")
+  labs(x = "Gender", y = "Approved Proportion") + 
+  ggtitle("a) Phase 1") +
+  theme(legend.position = "none", plot.title = element_text(size=12))
 
 bar_proportion_phase2 <- ggplot(data = phase2_applicants_cleaned, aes(x = gender, fill = phase2accepted_word)) +
   geom_bar(position = "fill") +
   scale_fill_manual(values=c("#9999CC", "#6C3082")) +
   theme_minimal() +
-  labs(title = "Pass Rate in Phase 2 by Gender",
-       x = "Gender", y = "Approved Proportion") +
-  theme(legend.title = element_blank())
+  labs(x = "Gender", y = "Approved Proportion") + 
+  ggtitle("b) Phase 2") + 
+  theme(legend.title = element_blank(), plot.title = element_text(size=12))
 
-bar_proportion_phase1_2 <- arrangeGrob(bar_proportion_phase1, bar_proportion_phase2, ncol=2)
-ggsave(file="images/hiring_barchart_gender.png", bar_proportion_phase1_2)
+bar_proportion_phase1_2 <- grid.arrange(bar_proportion_phase1,bar_proportion_phase2, ncol = 2,
+                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in Phase 1 and 2 by Gender", 
+                                                          x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
+ggsave(file="images/hiring_barchart_gender.png", bar_proportion_phase1_2, height = 3)
 
 
 box_interviewer1 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_1)) +
   geom_boxplot() +
   ylim(55, 95) +
   theme_minimal() +
-  labs(title = "interviewer1 scores by Gender", x = "Gender", y= "rating") +
-  theme(plot.title = element_text(hjust = 0.5))
+  labs(title = "a) Interviewer 1", x = "Gender", y= "rating") +
+  theme(plot.title = element_text(hjust = 0.5, size = 12))
   
 box_interviewer2 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_2)) +
   geom_boxplot() +
   ylim(55, 95) +
   theme_minimal() +
-  labs(title = "interviewer2 scores by Gender", x = "Gender", y= "rating") +
-  theme(plot.title = element_text(hjust = 0.5))
+  labs(title = "b) Interviewer 2", x = "Gender", y= "rating") +
+  theme(plot.title = element_text(hjust = 0.5, size = 12))
 
-box_proportion_interviewer1_2 <- arrangeGrob(box_interviewer1, box_interviewer2, ncol=2)
-ggsave(file="images/hiring_boxplot_gender.png", box_proportion_interviewer1_2)
+box_proportion_interviewer1_2 <- grid.arrange(box_interviewer1,box_interviewer2, ncol = 2, 
+                                              bottom = textGrob("Figure 5: Distribution of Interview Scores in Phase 3 by Gender", 
+                                                                x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 10)))
+ggsave(file="images/hiring_boxplot_gender.png", box_proportion_interviewer1_2, height = 3)
 
 ## figure for excutive summary
-ggsave(file="images/hiring_barchart_gender_2.png", bar_proportion_phase1_2, height = 2)
-ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2, height = 2)
+bar_proportion_phase1_2_exc <- grid.arrange(bar_proportion_phase1,bar_proportion_phase2, ncol = 2,
+                                        bottom = textGrob("Figure 4: Proportion of Applicants who Passed/Failed in Phase 1 and 2 by Gender", 
+                                                          x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 8.5)))
+ggsave(file="images/hiring_barchart_gender_2.png", bar_proportion_phase1_2_exc, height = 2.35)
+
+box_proportion_interviewer1_2_exc <- grid.arrange(box_interviewer1,box_interviewer2, ncol = 2, 
+                                              bottom = textGrob("Figure 5: Distribution of Interview Scores in Phase 3 by Gender\n\nThe horizontal line in the middle of each box represents the point separating the highest 50% interview\nscores from the lowest 50%. The horizontal lines at the top and bottom of each box represent the\nlowest 75% and 25% of the scores, respectively. The vertical lines and dots in the plot give the full range\nof values, with some extreme values further away from the middle of the box.", x = 0.09, y = 0.5, just = "left", gp = gpar(fontsize = 9)))
+ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2_exc, height = 3.1)
 
 ```
 
@@ -606,6 +617,7 @@ We will use simple linear regression model in phase 3. We have one fixed effects
 
 From confidence interval, we can see the coefficients of gender contains 0, so we can say interviewers are not biased by gender. In other words, gender does not give effect to interview scores.
 
+\newpage
 ## Discussion
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
@@ -630,7 +642,7 @@ For future consideration of our study, we could look into salary and promotion d
 
 **Yoon Young Lee**. Yoon Young is a junior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
 
-**Guemin Kim**. Guemin is a junior data engineer with KoCad. She specializes in machine learning and statistical communication. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
+**Guemin Kim**. Guemin is a junior data engineer with KoCad. She specializes in data analysis and machine learning. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
 
 **Woolim Kim**. Woolim is a junior data analyst with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
 
