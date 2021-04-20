@@ -38,7 +38,7 @@ Current research was conducted by KoCad to investigate potential biases as well 
 - Male employees' average salary was approximately $1785.6 dollars more than that of female.
 - Among those who have never been promoted, the proportion of female employees was slightly greater than that of male employees; However, unlike the proportion of male employees that increased with the number of promotions, the proportion of female employees decreased as the number of promotions increased.
 - The promotion rate per financial quarter for the male employees was about 1.38 times greater than female employees.
-- In the first hiring phase by AI, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
+- In the first hiring phase assessed by AI, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
 - In the second hiring phase, only 7% of the applicants were invited to an interview and among them, the number of male applicants were slightly greater than female applicants.
 
 ## Limitations
@@ -160,9 +160,9 @@ ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
 
 ![](images/salary_boxplot_role.png)
 
-Also, we see that salary significantly depends on the person's role seniority level. In particular, manager, director, vice president receives salaries significantly different from other positions (see Figure 2). 
+Also, we see that salary significantly depends on the person's role seniority level. In particular, manager, director, vice president receive salaries significantly different from other positions (see Figure 2). 
 
-We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1). Although gender does not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggests a significant difference. However, we need to see this along with other variables related to an employee's value to the company. Thus, we will see whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
+We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1). Although gender did not seemed to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggested a significant difference. However, we needed to see this along with other variables related to an employee's value to the company. Thus, we investigated whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
 
 ```{r}
 #########################################################################################################
@@ -172,7 +172,7 @@ my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>%
   ggplot(aes(x = gender, y = salary)) +
   geom_boxplot() +
   theme_minimal() +
-  labs(x = "Gender", y= "Salary($)", caption = "Figure1: Boxplots for Salary by Seniority Role") +
+  labs(x = "Gender", y= "Salary($)", caption = "Figure 1A: Boxplots for Salary by Seniority Role") +
   theme(plot.caption = element_text(hjust = 0))
 
   
@@ -191,7 +191,7 @@ lmod_gender <- lm(salary ~ gender, data = black_saber_current_employees_cleaned)
 
 **\underline{Methods}**  
 
-We chose a linear mixed effects model for the regression model because financial quarter will also produce sysematic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we are not interested in this variable because we only care about the employee's value. Further, statistically speaking, employees' salaries were sampled across various financial quarter and so this would violate the independence assumption for observations. Thus, it was important to add financial quarter as a random intercept.
+We chose a linear mixed effects model for the regression model because financial quarter will also produce sysematic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we were not interested in this variable because we only cared about the employee's value. Further, statistically speaking, employees' salaries were sampled across various financial quarter and so this would violate the independence assumption for observations. Thus, it was important to add financial quarter as a random intercept.
 
 ```{r}
 #########################################################################################################
@@ -213,7 +213,7 @@ salary_lmer_no_gender <- lmer(salary ~ team + role_seniority + leadership_for_le
 
 ```
 
-Results of the maximum likelihood test comparing models with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors was significant (see Appendix). The significant p-value shows that we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicates that gender cause notable difference in salary and so there is a gender bias in salary.
+Results of the maximum likelihood test comparing models with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors was significant. The significant p-value showed that we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicated that gender causes notable difference in salary and therefore there is a gender bias in salary.
 
 ```{r, echo=TRUE}
 #########################################################################################################
@@ -226,7 +226,7 @@ lmtest::lrtest(salary_lmer, salary_lmer_no_gender)
 #conclusion: indeed, becuase the p-value is significant, simpler model does NOT explain better than complex model = should include gender to have better predictive ability...
 
 ```
-Note that we also tested whether we should include team as predictor for salary becuase it might be ambiguous of whether team has fixed effect on salary based on the above plot as compared to seniority of role. The result showed that we should also include team (see appendix).
+Note that we also tested whether we should include team as predictor for salary becuase it might be ambiguous of whether team had fixed effect on salary based on the above plot as compared to seniority of role. The result showed that we should also include team.
 ```{r}
 #This test confirms that we need team as predictor
 lmtest::lrtest(salary_lmer, salary_lmer_no_team)
@@ -240,9 +240,9 @@ kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Partial
   kable_styling(latex_options = "scale_down")
 ```
 
-Table1 shows that for our final model predicting salary, man receives salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's talent to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars. For full information about coefficient estimates for the final model for salary, please see Table1 in the Appendix.
+Table1 shows that for our final model predicting salary, man received salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's talent to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars. For full information about coefficient estimates for the final model for salary, please see Table1 in the Appendix.
 
-In conclusion, there is a gender bias in salary since gender improves salary prediction above and beyond inclusion of other variables, which are the factors that show the employee's value to Black Saber Software. Moreover, such factors not only includes employee's productivity and leadership, but also the team they are in and the role they take in the company. 
+In conclusion, there was a gender bias in salary since gender improved salary prediction above and beyond inclusion of other variables, which were the factors that showed the employee's value to Black Saber Software. Moreover, such factors not only included employee's productivity and leadership, but also the team they are in and the role they take in the company. 
 
 ## A potential Gender Bias in Promoting Process
 
@@ -319,7 +319,7 @@ promotion_count_by_gender_plot <- promotion_data %>%
   ggplot(aes(x = promotion_count, fill = gender)) +
   geom_histogram(colour = "grey", binwidth= 1) +
   theme_minimal() +
-  labs(x = "Number of Promotions for employees", caption = "Figure3: Distribution of Employees' Number of Promotions by Gender") + 
+  labs(x = "Number of Promotions for employees", y="Count", caption = "Figure3: Distribution of Employees' Number of Promotions by Gender") + 
   scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC")) +
   theme(plot.caption = element_text(hjust = 0))
 
@@ -463,10 +463,10 @@ phase2_applicants_cleaned <- filter(phase2_applicants_cleaned, gender != "Prefer
 ```
 
 We first made variables telling us whether an applicant passed each hiring phase or not.
-Since our main purpose was testing whether genders of applicants affects the acceptance of the phase or not, this ordinal variable helped us make a response variable to have Bernoulli distribution.
+Since our main purpose was to test whether or not the gender of applicants affected the acceptance of the phase, this ordinal variable helped us create a response variable that follows Bernoulli distribution.
 Some phases did not have information about genders of applicants, so we made all phases to have gender information of all applicants.
 
-In phase 2, we can see that none of the applicants who preferred not to say about their gender got accepted and therefore, We omitted the Prefer Not to Say gender from phase 2. 
+In phase 2, we could see that none of the applicants who preferred not to say about their gender got accepted and therefore, we omitted them from phase 2. 
 
 ```{r hiring_visualization}
 #########################################################################################################
@@ -506,14 +506,14 @@ box_interviewer1 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interv
   geom_boxplot() +
   ylim(55, 95) +
   theme_minimal() +
-  labs(title = "a) Interviewer 1", x = "Gender", y= "rating") +
+  labs(title = "a) Interviewer 1", x = "Gender", y= "Rating") +
   theme(plot.title = element_text(hjust = 0.5, size = 12))
   
 box_interviewer2 <- ggplot(phase3_applicants_cleaned, aes(x = gender, y = interviewer_rating_2)) +
   geom_boxplot() +
   ylim(55, 95) +
   theme_minimal() +
-  labs(title = "b) Interviewer 2", x = "Gender", y= "rating") +
+  labs(title = "b) Interviewer 2", x = "Gender", y= "Rating") +
   theme(plot.title = element_text(hjust = 0.5, size = 12))
 
 box_proportion_interviewer1_2 <- grid.arrange(box_interviewer1,box_interviewer2, ncol = 2, 
@@ -535,14 +535,14 @@ Nearly half (50.7%) of our 613 applicants were females.
 
 ![](images/hiring_barchart_gender.png)
 
-The proportions of applicants who were accepted in phase 1 had similar proportion between male and female. We can see 25% of difference in the accepted rate in phase 1 with the applicants who preferred not to say their gender, so we will see more detaily by models.
-Remind that this is proportion so the proportion depends on the number of the applicants. We have only 11 Prefer not to say applicants, which is 2% of whole applicants. 
+The proportions of applicants who got accepted in phase 1 had similar proportion between male and female. We can see 25% of difference in the accepted rate in phase 1 for those who preferred not to say their gender, so we investigated them in more details using a model.
+Remind that this is proportion depends on the number of the applicants and that we only had 11 applicants (2% of the entire applicants) who preferred not to say about their gender. 
 
-In phase 2, we can see male has slightly higher percentage than female. However, the number of people who accepted in phase 2 has small proportion(7%), so we need to be careful for the difference. 
+In phase 2, the proportion of male applicants was slightly higher than that of female applicants. However, since only a small proportion(7%) of the applicants were accepted in the phase 2, we had become more cautious when we interpreted the difference. 
 
 ![](images/hiring_boxplot_gender.png)
 
-In phase 3, interviewer 1 and 2 gives similar range of grades to an interview. Even though there are slight mean difference between male and female for interviewer 2, it is just 2.5 points difference so we can assume that gender does not give effect to the interview score.
+In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Although there was a slight difference between mean scores of male and female who were assessed by interviewer 2, it was only a small difference of 2.5 in scores; Therefore, we could assume that gender did not influence the interview score.
 
 **\underline{Methods}**  
 ```{r hiring_model_phase_1}
@@ -567,14 +567,13 @@ drop_in_deviance <- anova(phase1_glm_no_gender, phase1_glm, test = "Chisq")
 drop_in_deviance
 ```
 
-We do not know how AI made grade for each applicants but AI will consider all the variables, so we put all variables as fixed effects. 
-Response variable follows Bernoulli, which is passed each phase or not. Therefore as use logit link function, we can assume that there is a linear relationship between the transformed response and explanatory variables. 
-We can assume that information of each applicants are independent. 
-Therefore we used generalized mixed model.
+Although we did not know how AI evaluated each applicants, we put all variables as fixed effect, thinking that AI will consider all the variables into account. 
+Response variable followed Bernoulli distribution, which indicates whether each applicant passed each phase or not. Since the logit link was used for Bernoulli response, we could assume that there was a linear relationship between the transformed response and explanatory variables. Also, We could assume that information of each applicants are independent. 
+After checking for the assumptions as above, we used generalized mixed model.
 
-In initial model, where gender is our only predictor, confidence interval of all genders includes 0. Therefore at the 95% confidence level, it is believable that female applicants and male applicants with applicants who prefer not to say gender have the same log odds of accepted by AI in phase 1. We will see more carefully that AI is biased with gender with other variables in phase 1.
+In initial model, where gender was our only predictor, confidence interval of all genders included 0. Therefore at the 95% confidence level, it was believable that male and female applicants who preferred not to say about their gender had the same log odds of being accepted by AI in phase 1. In addition to this model, we tried to investigate whether the AI was biased with gender and other variables in phase 1 by comparing two models; One with all variables included and another with gender excluded from the first model.
 
-In the models with all other variables, the deviance test tells us that it is not preferable that adding gender as an indicator variable to the model. The deviance difference between models with gender and without gender is 1.21, which is pretty small. Also, the large p-value also supports that adding new indicator variable, which is gender, to the model with all the other variables is not helpful.
+The deviance test using the two models told us that it is not preferable to add gender as a predictor variable to the model. The deviance difference between models with and without gender was 1.21, which was pretty small. Also, the large p-value supported that adding a new indicator variable, gender, to the model with all the other variables included was not very helpful in predicting the acceptance of an applicant.
 
 ```{r hiring_model_phase_2}
 #model where gender is only predictor
@@ -592,7 +591,7 @@ drop_in_deviance <- anova(phase2_glm_no_gender, phase2_glm, test = "Chisq")
 drop_in_deviance
 ```
 
-Similar as phase 1, we can see that there are small deviance(0.62) and large p-value(0.43) in deviance test. Therefore adding gender to the model does not explain acceptance of applicants in phase 2. 
+Similarly, we could see that there were small deviance(0.62) and large p-value(0.43) in deviance test for phase 2 models. Therefore adding gender to the model did not explain the acceptance of applicants in phase 2. 
 
 ```{r hiring_model_phase_3}
 #Simple linear model with gender covariate for interviewer 1
@@ -610,20 +609,18 @@ par(mfrow=c(2,2))
 plot(phase3_interviewer2)
 ```
 
-We will use simple linear regression model in phase 3. We have one fixed effects, which is interview rating and gender. we can assume interview rate is related to gender linearly. By residuals and fitted value plot we can see the mean of the erros is 0. Also, standardized residuals and fitted value graph shows us the errors are homoscedastic. And obviously, the errors are uncorrelated.
+Lastly, for phase 3, we used a simple linear regression model. We had one predictor, gender, for interview ratings. we assumed that interview scores were related to gender linearly. By residuals and fitted value plot we could see that the mean of the errors was 0. Also, standardized residuals and fitted value graph showed us the errors were homoscedastic. Lastly, the errors were uncorrelated.
 
-From confidence interval, we can see the coefficients of gender contains 0, so we can say interviewers are not biased by gender. In other words, gender does not give effect to interview scores.
+From confidence interval, we could see that the coefficients of gender contained 0. Therefore, we concluded that interviewers were not biased with gender. In other words, gender did not affect interview scores.
 
 \newpage
 ## Discussion
 
-_In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
+Overall, the results of statistical analysis suggest that there is a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialing AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
 
-Overall, the results of statistical analyses suggest that there is a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialing AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
-
-In particular, for salary, we found that employee will be affected by gender when other explanatory variables such as productivity, leadership, and team are controlled.
+In particular, we found that salary will be affected by gender when other explanatory variables such as productivity, leadership, and team are controlled.
 Furthermore, for promotion, number of promotion also get affected by gender when other factors such as productivity, leadership, salary and role seniority are fixed.
-In hiring process, we can find that both AI and human are not biased with gender. Specifically, we found that applicants will not be affected by gender from AI when AI decide the applicant is pass to phase or not. Also, the grade of interview will not be affected by gender from interviewer either.
+In hiring process, we can find that both AI and human are not biased with gender. Specifically, we found that applicants' acceptance will not be affected by gender assessed by AI. Also, the interview score will not be affected by gender when applicants are evaluated by interviewers in phase 3.
 
 ### Strengths and limitations
 
@@ -631,7 +628,7 @@ One limitation of our analysis is that the provided data did not contain informa
 
 Another limitation with making models in hiring process is that we do not know the evaluation criteria for each phase. If we know how score is being calculated by the implemented AI, it would be easier to identify what effects are correlated, and make better model with interaction terms. Same for interview score, if we are given with a list of interview questions and an evaluation criteria template that contains detailed components of the grading schemes, we would be able to explore potential biases in the interview phase more in depth.
 
-For future consideration of our study, we could look into promotion distributions by team, role and financial quarter and identify segments with pronounced biases. This way, we will not only be able to figure out whether or not the company’s wage and promotion systems are biased but we can also find out specific teams, roles or financial quarters in which the biases are present.
+For future consideration of our study, we could look into promotion distribution by team, role and financial quarter and identify segments with pronounced biases. This way, we will not only be able to figure out whether or not the company’s promotion system is biased but we can also find out specific teams, roles or financial quarters in which the biases are present.
 
 \newpage
 # Consultant information
@@ -646,11 +643,6 @@ For future consideration of our study, we could look into promotion distribution
 **Hojung Kim**. Hojung is a junior data analyst with KoCad. He specializes in mathematical statistics and statistical communication. Hojung earned his Bachelor of Science, Majoring in Statistics and Mathematics from the University of Toronto in 2022.
 
 ## Code of ethical conduct
-
-_This section should be fairly short, no more than half a page. Assume a general audience, much like your executive summary._
-
-* _Make at least three relevant statements about your company’s approach to ethical statistical consulting. These should be appropriately in line with professional conduct advice like the (Statistical Society of Canada Code of Conduct)[https://ssc.ca/sites/default/files/data/Members/public/Accreditation/ethics_e.pdf] or the (Ethical Guidelines for Statistical Practice from the American Statistical Society)[https://www.amstat.org/ASA/Your-Career/Ethical-Guidelines-for-Statistical-Practice.aspx]. For example, "the customer is always right" ISN’T the type of thing an ethical statistical consultant would include._
-*	_Be very careful not to just copy and paste from these other documents! Put things in your own words._
 
 **Responsibility of Statistician**
 - KoCad acknowledges the statisticans' responsibility of manipulating data, analyzing data, and interpreting the result of analysis in a transparent way. KoCad promises not to manipulate data in a way that will introduce bias, in order to create a significant result. KoCad approaches the analysis with the appropriate model for the given data and not by the model that we want. KoCad communicates the results in a manner that considers indiviudal differences in beliefs, opinions, and background.
@@ -711,6 +703,3 @@ kable(round(phase3_table,4),
       format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
-
-
-__Final advice: KNIT EARLY AND OFTEN!__
