@@ -36,11 +36,10 @@ Current research was conducted by KoCad to investigate potential biases as well 
 
 ## Key findings
 - Male employees' average salary was approximately $1785.6 dollars more than that of female.
-- Among those who have never been promoted, the proportion of female employees was slightly greater than that of male employees; however, unlike the proportion of male employees that increased with the number of promotions, the proportion of female employees decreased as the number of promotions increased.
+- Among those who have never been promoted, the proportion of female employees was slightly greater than that of male employees; However, unlike the proportion of male employees that increased with the number of promotions, the proportion of female employees decreased as the number of promotions increased.
 - The promotion rate per financial quarter for the male employees was about 1.38 times greater than female employees.
-- In the first hiring phase, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
-- In phase 2, only 7% of the applicants were invited to an interview and among them, the number of male applicants were slightly greater than female applicants.
-- In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Also, the average score for women was similar to that of men with a small difference of 2.5 in scores.
+- In the first hiring phase by AI, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
+- In the second hiring phase, only 7% of the applicants were invited to an interview and among them, the number of male applicants were slightly greater than female applicants.
 
 ## Limitations
 The lack of information on salary determination methods, promotion policies, and evaluation criteria in the hiring process has limited our models' ability to produce more accurate results.
@@ -61,7 +60,7 @@ The key findings of the analysis are summarized in the following figures:
 \newpage
 # Technical report  
 ## Introduction
-Society has been discriminating against women. They received unequal opportunities to get jobs and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. And considering this social atmosphere, our client, Black Saber Software also requested to launch an investigation on potential bias in their hiring, promoting and salary distributing processes. Using the hiring data for their new grad program and data about promotion and salary for their entire staffs, the present report investigated whether employees of Black Saber Software were hired, promoted, and paid based on their value to the company, not on discriminatory factors such as gender. First, we explored whether the employees were being paid fairly and that salary was not affected by one’s gender, using a linear mixed effects model. Then, we studied the relationship between promotion frequency and some potential factors, particularly focusing on identifying the presence of gender bias in the promotion process. Here, we used a generalized linear model with the number of promotions as the response. In addition, with a simple linear regression and generalized mixed effects models, we explored the fairness of the recruitment process by investigating whether the implementation of AI algorithms and the interviewers who evaluated job applicants had gender bias. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement. 
+Society has been discriminating against women. They received unequal opportunities to get jobs and earn money based on their assets. With increasing concern about EDI, companies are moving toward implementing EDI initiatives. Considering this social atmosphere, our client, Black Saber Software also requested to launch an investigation on potential bias in their hiring, promoting and salary distributing processes. Using the hiring data for their new grad program and data about promotion and salary for their entire staffs, the present report investigated whether employees of Black Saber Software were hired, promoted, and paid based on their value to the company, not on discriminatory factors such as gender. First, we explored whether the employees were being paid fairly and that salary was not affected by one’s gender, using a linear mixed effects model. Then, we studied the relationship between promotion frequency and some potential factors, particularly focusing on identifying the presence of gender bias in the promotion process. Here, we used a generalized linear model with the number of promotions as the response. In addition, with a simple linear regression and generalized mixed effects models, we explored the fairness of the recruitment process by investigating whether the implementation of AI algorithms and the interviewers who evaluated job applicants had gender bias. Finally, we discussed the limitations and strengths of our methods and suggested a future direction for improvement. 
 
 ### Research questions
 Throughout the analysis, we focused on assessing the fairness in the hiring, promoting, and salary distributing processes at Black Saber Software. Below are our questions of interest:
@@ -463,10 +462,11 @@ phase1_applicants_cleaned <- phase1_applicants %>%
 phase2_applicants_cleaned <- filter(phase2_applicants_cleaned, gender != "Prefer not to say")
 ```
 
-We first made variable called phaseNaccepted telling us whether an applicant pass that phase or not.
-Since our main purpose is testing whether genders of applicants gives affects to the acceptance of the phase or not, this ordinal variable will help us to make response variable to have bernoulli distribution.
-Some phases do not have information about genders of applicants, so make all phases have gender information of all applicants.
-Also, in phase 2, we can see that no one get accepted. We will omit the Prefer Not to Say gender from phase 2. 
+We first made variables telling us whether an applicant passed each hiring phase or not.
+Since our main purpose was testing whether genders of applicants affects the acceptance of the phase or not, this ordinal variable helped us make a response variable to have Bernoulli distribution.
+Some phases did not have information about genders of applicants, so we made all phases to have gender information of all applicants.
+
+In phase 2, we can see that none of the applicants who preferred not to say about their gender got accepted and therefore, We omitted the Prefer Not to Say gender from phase 2. 
 
 ```{r hiring_visualization}
 #########################################################################################################
@@ -531,14 +531,14 @@ ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2_
 
 ```
 
-Nearly half (50.7%) of our 613 applicants are females. 
+Nearly half (50.7%) of our 613 applicants were females. 
 
 ![](images/hiring_barchart_gender.png)
 
-The proportions of applicants who are accepted in phase 1 has similar proportion between male and female. We can see 25% of difference in the the accepted rate in phase 1 with the applicants who prefer not to say their gender, so we will see more detaily by models.
+The proportions of applicants who were accepted in phase 1 had similar proportion between male and female. We can see 25% of difference in the accepted rate in phase 1 with the applicants who preferred not to say their gender, so we will see more detaily by models.
 Remind that this is proportion so the proportion depends on the number of the applicants. We have only 11 Prefer not to say applicants, which is 2% of whole applicants. 
 
-In phase2, we can see male has slightly higher percentage than female. However, the number of people who accepted in phase 2 has small proportion(7%), so we need to be careful for the difference. 
+In phase 2, we can see male has slightly higher percentage than female. However, the number of people who accepted in phase 2 has small proportion(7%), so we need to be careful for the difference. 
 
 ![](images/hiring_boxplot_gender.png)
 
@@ -567,8 +567,8 @@ drop_in_deviance <- anova(phase1_glm_no_gender, phase1_glm, test = "Chisq")
 drop_in_deviance
 ```
 
-We do not know how AI make grade for each applicants but AI will consider all the variables, so we put all variables as fixed effects. 
-Response variable follows bernoulli, which is passed each phase or not. Therefore as use logit link function, we can assume that there is a linear relationship between the transformed response and explanatory variables. 
+We do not know how AI made grade for each applicants but AI will consider all the variables, so we put all variables as fixed effects. 
+Response variable follows Bernoulli, which is passed each phase or not. Therefore as use logit link function, we can assume that there is a linear relationship between the transformed response and explanatory variables. 
 We can assume that information of each applicants are independent. 
 Therefore we used generalized mixed model.
 
@@ -619,7 +619,7 @@ From confidence interval, we can see the coefficients of gender contains 0, so w
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
 
-Overall, the results of statistical analyses suggest that there is a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialling AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
+Overall, the results of statistical analyses suggest that there is a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialing AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
 
 In particular, for salary, we found that employee will be affected by gender when other explanatory variables such as productivity, leadership, and team are controlled.
 Furthermore, for promotion, number of promotion also get affected by gender when other factors such as productivity, leadership, salary and role seniority are fixed.
@@ -627,11 +627,11 @@ In hiring process, we can find that both AI and human are not biased with gender
 
 ### Strengths and limitations
 
-One limitation of our analysis is that the provided data did not contain information on how the company would select employees for promotion. Understanding the company’s core values or knowing more about employee promotion policies will help us indentify the right factors that affect employee promotion.
+One limitation of our analysis is that the provided data did not contain information on how the company would select employees for promotion. Understanding the company’s core values or knowing more about employee promotion policies will help us identify the right factors that affect employee promotion.
 
 Another limitation with making models in hiring process is that we do not know the evaluation criteria for each phase. If we know how score is being calculated by the implemented AI, it would be easier to identify what effects are correlated, and make better model with interaction terms. Same for interview score, if we are given with a list of interview questions and an evaluation criteria template that contains detailed components of the grading schemes, we would be able to explore potential biases in the interview phase more in depth.
 
-For future consideration of our study, we could look into salary and promotion distributions by team, role and financial quarter and identify segments with pronounced biases. This way, we will not only be able to figure out whether or not the company’s wage and promotion systems are biased but we can also find out specific teams, roles or financial quarters in which the biases are present.
+For future consideration of our study, we could look into promotion distributions by team, role and financial quarter and identify segments with pronounced biases. This way, we will not only be able to figure out whether or not the company’s wage and promotion systems are biased but we can also find out specific teams, roles or financial quarters in which the biases are present.
 
 \newpage
 # Consultant information
@@ -641,7 +641,7 @@ For future consideration of our study, we could look into salary and promotion d
 
 **Guemin Kim**. Guemin is a junior data engineer with KoCad. She specializes in data analysis and machine learning. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
 
-**Woolim Kim**. Woolim is a junior data analyst with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
+**Woolim Kim**. Woolim is an intern statistician with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
 
 **Hojung Kim**. Hojung is a junior data analyst with KoCad. He specializes in mathematical statistics and statistical communication. Hojung earned his Bachelor of Science, Majoring in Statistics and Mathematics from the University of Toronto in 2022.
 
