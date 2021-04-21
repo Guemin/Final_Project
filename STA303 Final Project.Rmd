@@ -166,7 +166,7 @@ ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
 
 Also, we saw that salary significantly depended on the person's role seniority level. In particular, as shown in Figure 2, manager, director and vice president received salaries significantly different from other positions. 
 
-We also looked at a boxplot for salary by gender to see whether there was a gender difference in salary (see Appendix Figure 1A). Although gender did not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggested a significant difference. However, we needed to see this along with other variables related to an employee's value to the company. Thus, we investigated whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
+We also looked at a boxplot for salary by gender to see whether there was a gender difference in salary (see Appendix Figure A.1). Although gender did not seem to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggested a significant difference. However, we needed to see this along with other variables related to an employee's value to the company. Thus, we investigated whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
 
 ```{r}
 #########################################################################################################
@@ -245,7 +245,7 @@ kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Table 1
   kable_styling(latex_options = "scale_down")
 ```
 
-Table 1 shows that for our final model predicting salary, man received salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's value to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars. For full information about coefficient estimates for the final model for salary, please see Table 1 in the Appendix.
+Table 1 shows that for our final model predicting salary, man received salary approximately 1785.6 dollars more than woman, on average, while controlling for variables related to employee's value to the company. Similarly, on average, people who did not prefer to say their gender also received salary higher than woman by approximately 500 dollars^[For full information about coefficient estimates for the final model for salary, please see Table A.1 in the Appendix.]. 
 
 In conclusion, there was a gender bias in salary since gender improved salary prediction above and beyond inclusion of other variables, which were the factors that showed the employee's value to Black Saber Software. Moreover, such factors not only included employee's productivity and leadership, but also the team they are in and the role they take in the company. 
 
@@ -415,7 +415,7 @@ kable(round(table[1:3,],4), caption = "Table 2: Partial Table of Coefficient Est
   kable_styling(latex_options = "scale_down")
 ```
 
-From the summary of the model, only the p-value for male employees was significant^[The full table of the estimates and 95 % confidence interval for the model is included in the Appendix]. Also, considering that the 95% confidence interval for male employees did not contain 0, there was an evidence against the hypothesis that there is no difference in promotion frequency between men and women^[Woman was our baseline for gender]. Specifically, Table 2 suggests that the promotion rate per financial quarter for male employees was nearly 1.38 times greater than that of females, after controlling for other predictors. In other words, a gender bias was actually present in the promoting process at the Black Saber Software.  
+From the summary of the model, only the p-value for male employees was significant^[The full table of the estimates and 95 % confidence interval for the model is included in the Table A.2 in the Appendix]. Also, considering that the 95% confidence interval for male employees did not contain 0, there was an evidence against the hypothesis that there is no difference in promotion frequency between men and women^[Woman was our baseline for gender]. Specifically, Table 2 suggests that the promotion rate per financial quarter for male employees was nearly 1.38 times greater than that of females, after controlling for other predictors. In other words, a gender bias was actually present in the promoting process at the Black Saber Software.  
 
 
 ## Fairness in Hiring Process  
@@ -653,7 +653,7 @@ The deviance tests using the two models showed that it is not preferable to add 
 
 Similarly, we could see that there were small deviance of 0.62 and large p-value of 0.43 in deviance test for phase 2 models. Therefore, adding gender to the model did not explain the acceptance of applicants in phase 2. 
 
-From the confidence interval in phase 3, we could see that the coefficients of gender contained 0.^[The full table of the 95 % confidence interval for the model is included in the Appendix] Therefore, we concluded that interviewers were not biased with gender. In other words, gender did not affect interview scores.
+From the confidence interval in phase 3, we could see that the coefficients of gender contained 0.^[The full table of the 95 % confidence interval for the model is included in the Table A.5 in the Appendix] Therefore, we concluded that interviewers were not biased with gender. In other words, gender did not affect interview scores.
 
 \newpage
 ## Discussion
@@ -666,11 +666,11 @@ In hiring process, we revealed that both the AI and human interviewers were not 
 
 ### Strengths and limitations
 
-Throughout the analysis, we demonstrated high understandings of statistical concepts and the data provided by our client company, Black Saber Software. Instead of taking the superficial details of data, we considered how each variable may contribute to another variable by thinking about how the relationship between variables play out in real life. For example, when we modelled the number of promotions to see if there was a gender bias in the promotion process, we created an offset that accounts for different work periods of employees so that our response, the number of promotions, could be adjusted to be comparable across employees with different work periods. 
+Throughout the analysis, we demonstrated high understandings of statistical concepts and the data provided by our client company, Black Saber Software. Instead of taking the superficial details of data, we considered how each variable may play out in real life and thus made appropriate modifications to data and chose the apt model. For example, when we modelled the number of promotions to see if there was a gender bias in the promotion process, we acknowledged that the more a person stays at the company, the more likely they are to get promoted just by the mere fact that there are more opportunities for them to get promoted. Accordingly, we created an offset that accounts for different work periods of employees so that our response, the number of promotions, could be adjusted to be comparable across employees with different work periods.
 
-One limitation of our analysis is that the provided data did not contain information on how the company would select employees for promotion. Understanding the company’s core values or knowing more about employee promotion policies will help us identify the right factors that affect employee promotion.
 
-Another limitation with making models in hiring process is that we do not know the evaluation criteria for each phase. If we know how score is being calculated by the implemented AI, it would be easier to identify what effects are correlated, and make better model with interaction terms. Same for interview score, if we are given with a list of interview questions and an evaluation criteria template that contains detailed components of the grading schemes, we would be able to explore potential biases in the interview phase more in depth.
+On the other hand, one limitation of our analysis was that the provided data did not contain information on how the company select employees for promotion. Understanding the company’s core values or knowing more about employee promotion policies will help us identify the right factors that affect employee promotion. Another limitation with making models in hiring process was that we did not know the evaluation criteria for each phase. If we knew how score is being calculated by interviewers, we would be able to explore potential biases in the interview phase more in depth.
+
 
 For future consideration of our study, we could look into promotion distribution by team, role and financial quarter and identify segments with pronounced biases. This way, we will not only be able to figure out whether or not the company’s promotion system is biased but we can also find out specific teams, roles or financial quarters in which the biases are present.
 
