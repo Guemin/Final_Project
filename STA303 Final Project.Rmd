@@ -14,6 +14,9 @@ titlepage-color: "6C3082"
 titlepage-text-color: "FFFFFF"
 titlepage-rule-color: "FFFFFF"
 titlepage-rule-height: 2
+header-includes:
+  - \usepackage{caption}
+    \captionsetup[table]{labelformat=empty}
 ---
 
 ```{r, message = FALSE, echo=FALSE, warning=FALSE}
@@ -173,7 +176,7 @@ my_plot_salary_by_gender <- black_saber_current_employees_cleaned %>%
   ggplot(aes(x = gender, y = salary)) +
   geom_boxplot() +
   theme_minimal() +
-  labs(x = "Gender", y= "Salary($)", caption = "Figure 1A: Boxplots for Salary by Seniority Role") +
+  labs(x = "Gender", y= "Salary($)", caption = "Figure A.1: Boxplots for Salary by Seniority Role") +
   theme(plot.caption = element_text(hjust = 0))
 
   
@@ -238,7 +241,7 @@ This table shows the coefficient estimates for Gender variable, calculated from 
 
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
-kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Partial Table of Coefficient Estimates for Salary Model Including Gender", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(salary_table[1:3,],4), col.names = c("Estimate"), caption = "Table 1: Partial Table of Coefficient Estimates for Salary Model Including Gender", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
@@ -408,7 +411,7 @@ This table shows the estimates and 95% confidence interval for Gender variable, 
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 table <- cbind(Estimate = summary(mod3)$coef[,1],
                confint(mod3))
-kable(round(table[1:3,],4), caption = "Partial Table of Coefficient Estimates and 95% Confidence Interval for Gender in the Final Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(table[1:3,],4), caption = "Table 2: Partial Table of Coefficient Estimates and 95% Confidence Interval for Gender in the Final Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
@@ -620,7 +623,7 @@ Lastly, for phase 3, we used a simple linear regression model with a single pred
 This table shows the deviances and p-values for model 1 which excluded gender and model 2 which include all variables:
 
 \begin{table}[h]
-\caption{Partial Table of Deviances and P-values for Gender in the Phase 1 and 2}
+\caption{Table 3: Partial Table of Deviances and P-values for Gender in the Phase 1 and 2}
 \label{tab:my-table}
 \centering
 \begin{tabular}{llllll}
@@ -704,13 +707,13 @@ exactly aligned with the expectations of the client. KoCad is responsible for re
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 # full summary output for salary model
 salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
-kable(round(salary_table[,],4), col.names = c("Estimate"), caption = "Full Table of Coefficient Estimates for Salary Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(salary_table[,],4), col.names = c("Estimate"), caption = "Table A.1: Full Table of Coefficient Estimates for Salary Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 
 # full summary output and 95% CIs for promotion model
 promotion_table <- cbind(Estimate = summary(mod3)$coef[,1],
                confint(mod3))
-kable(round(table,4), caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Promotion Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
+kable(round(table,4), caption = "Table A.2: Full Table of Coefficient Estimates with 95% Confidence Intervals for Promotion Model", booktabs = TRUE, valign = "t", format = "pandoc") %>%
   kable_styling(latex_options = "scale_down")
 
 
@@ -718,7 +721,7 @@ kable(round(table,4), caption = "Full Table of Coefficient Estimates with 95% Co
 phase1_table <- cbind(Estimate = summary(phase1_glm_no_gender)$coef[,1], 
                       confint(phase1_glm_no_gender))
 kable(round(phase1_table,4), 
-      caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Hiring Phase 1 Model", 
+      caption = "Table A.3: Full Table of Coefficient Estimates with 95% Confidence Intervals for Hiring Phase 1 Model", 
       booktabs = TRUE, 
       valign = "t", 
       format = "pandoc") %>%
@@ -727,7 +730,7 @@ kable(round(phase1_table,4),
 phase2_table <- cbind(Estimate = summary(phase2_glm_no_gender)$coef[,1], 
                       confint(phase2_glm_no_gender))
 kable(round(phase2_table,4), 
-      caption = "Full Table of Coefficient Estimates with 95% Confidence Intervals for Hiring Phase 2 Model", 
+      caption = "Table A.4: Full Table of Coefficient Estimates with 95% Confidence Intervals for Hiring Phase 2 Model", 
       booktabs = TRUE, 
       valign = "t", 
       format = "pandoc") %>%
@@ -738,7 +741,7 @@ phase3_table_2 <- cbind(confint(phase3_interviewer2))
 phase3_table <- rbind(phase3_table_1, phase3_table_2)
 rownames(phase3_table) <- c("(Intercept_1)", "genderMan_1", "(Intercept_2)", "genderMan_2")
 kable(round(phase3_table,4), 
-      caption = "Full Table of 95% Confidence Intervals for Hiring Phase 3 Model", 
+      caption = "Table A.5: Full Table of 95% Confidence Intervals for Hiring Phase 3 Model", 
       booktabs = TRUE, 
       valign = "t",
       format = "pandoc") %>%
