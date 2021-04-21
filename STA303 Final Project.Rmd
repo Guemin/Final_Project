@@ -234,6 +234,7 @@ lmtest::lrtest(salary_lmer, salary_lmer_no_team)
 ```
 
 **\underline{Results}**  
+This table shows the coefficient estimates for Gender variable, calculated from the final model:
 
 ```{r, include = TRUE, warning=FALSE, echo=FALSE, message = FALSE}
 salary_table <- cbind(Estimate = summary(salary_lmer)$coef[,1])
@@ -295,9 +296,12 @@ promotion_data <- full_join(black_saber_current_employees_cleaned, employee_data
   select(-c(year, quarter, recent_year, recent_quarter, current_role, employee_role, initial_role))
 
 ```
-For this particular topic, employee data that was cleaned in the previous section was used to study several potential factors that affected the company's promoting process. Since the main purpose of this research question was to see a potential bias presented in the promotion process, we first created a new variable that stored each employee's roles numerically, rather than categorically, to track changes in their roles more easily. This variable helped us determine the initial and current roles of each employee, and the difference between them. Such difference in roles gave us the number of times each employee was promoted. 
 
-For this analysis, the response variable was the number of promotions per employee received. Since there may be some employees who have been promoted more than once, it was thought that having a Bernoulli variable^[This Bernoulli variable indicates whether or not an employee has been promoted at least once] as our response would not take into account the variability in different number of promotions each employee received; Therefore, we chose our response to be the number of promotions, instead.
+
+For this particular topic, employee data cleaned in the previous section was used to study several potential factors that affected the company's promoting process. Since the main purpose of this research question was to see a potential bias presented in the promotion process, we created a promotion dataframe that includes the information about employees collected on the last quarter of 2020, a work period variable that accumulates all financial quarters an employee has experienced, and a new variable that stores each employee's roles numerically rather than categorically. The last variable allowed us to track changes in their roles more easily and thus helped us determine the initial and current roles of each employee and the difference between them. Such difference in roles gave us the number of times each employee was promoted. 
+
+
+For this analysis, the response variable was the number of promotions per employee received. Since there may be some employees who have been promoted more than once, we thought that having a Bernoulli variable^[This Bernoulli variable indicates whether or not an employee has been promoted at least once] as our response would not take into account the variability in different number of promotions each employee received. Therefore, we chose our response to be the number of promotions.
 
 
 
@@ -325,7 +329,7 @@ promotion_count_by_gender_plot <- promotion_data %>%
   theme(plot.caption = element_text(hjust = 0))
 
 promotion_count_by_gender_plot
-ggsave("images/promotion_count_by_gender_plot.png", width = 6, height = 4)
+ggsave("images/promotion_count_by_gender_plot.png", width = 6, height = 3)
 
 ## Figure for executive summary
 promotion_count_by_gender_plot_2 <- promotion_data %>% 
@@ -342,9 +346,7 @@ ggsave("images/promotion_count_by_gender_plot_2.png", height = 2.5)
 ```
 ![](images/promotion_count_by_gender_plot.png)
 
-Starting with our response, the number of promotions, it was found that around 48.6 % of the employees at the Black Saber Software have never been promoted since they first joined the company. (Figure3 illustrates the observed number of promotions for the employees by gender). The mean number of promotions recorded in the employee data was around 0.94 with a standard deviation of 1.17 and the number of promotions was highly right-skewed. However, this is not very surprising because since our response is a count, it is expected to follow a Poisson model with lambda equal to the observed mean number of promotions, and a Poisson distribution with a low mean is usually highly skewed. 
-
-Meanwhile, we were also interested in investigating whether gender bias was present in the promotion process at the Black Saber Software. According to Figure 3, there are more female employees who have never been promoted than male employees. As the number of promotions increased, this trend was becoming more pronounced, and among those who were promoted at least once, male employees accounted for more than women. Thus, this trend further highlighted the importance of identifying the potential gender bias present in the promotion process.
+According to Figure 3, among employees who have never been promoted, there were more women than men. This trend of women receiving less promotion than men was becoming more pronounced as the number of promotions increased: Among those who were promoted at least once, male employees accounted for more than women. Thus, it was important to identify the potential gender bias present in the promotion process.
 
 **\underline{Methods}**  
 ```{r}
@@ -361,8 +363,8 @@ mean_variance_model <- promotion_data %>%
 Since the response was a count, a Poisson regression was used to model our data. However, there were several assumptions that we had to check before fitting a Poisson model:  
 
 1. \textbf{Poisson Response:} Since the response was a count it followed a Poisson model.  
-2. \textbf{Independence:} This assumption was also met because each observation in the data contained information of different employees.  
-3. \textbf{Mean = Variance:} Accounting for the fact that the number of promotions varied from 0 to 7, the discrepancies between the mean and the variance, ranging from 0.3 to 0.5, were considered small; therefore, we assumed that the assumption of variability equal to the mean was also satisfied.  
+2. \textbf{Independence:} This assumption was also met because each observation in the promotion data contained information of different employees.  
+3. \textbf{Mean = Variance:} Accounting for the fact that the number of promotions varied from 0 to 7, the discrepancies between the mean and the variance, ranging from 0.3 to 0.5, were considered small. Therefore, we assumed that the assumption of variability equal to the mean was also satisfied.  
 4. \textbf{Linearity:} Since gender was not a continuous predictor, it was difficult to identify the linearity of log($\lambda$).  
   
     
@@ -395,9 +397,9 @@ anova(mod1, mod3, test = "Chisq")
 # strong evidence against the hypothesis that the simpler model fits the data just well
 ```
 
-As we were interested in studying the potential gender bias in the promoting process of the Black Saber Software, we created two different models to determine whether including the gender improves our model. In both models, we included an offset, which was the log of the work period, so that the number of promotions could be adjusted to be comparable across employees with different working periods^[Employees who have worked longer than others are more likely to be promoted at least once.].  
+As we were interested in studying the potential gender bias in the promoting process of the Black Saber Software, we created two different models and ran a drop-in-deviance test to determine whether including the gender improves our model. In both models, we included an offset, which was the log of the work period, so that the number of promotions could be adjusted to be comparable across employees with different working periods^[Employees who have worked longer than others are more likely to be promoted at least once.].  
 
-The initial model contained covariates such as leadership, productivity, salary and role seniority and it was compared with another model with an additional gender predictor. With a small p-value from the drop-in-deviance test, we concluded that adding gender actually improved the model.  
+The initial model contained covariates such as leadership, productivity, salary, and role seniority and this model was compared with another model that also included gender as a predictor, in addition to covariates in the inital model. Based on the small p-value from the drop-in-deviance test, we concluded that adding gender actually improved the model.  
 
 **\underline{Results}**  
 
@@ -410,7 +412,7 @@ kable(round(table[1:3,],4), caption = "Partial Table of Coefficient Estimates an
   kable_styling(latex_options = "scale_down")
 ```
 
-From the summary of the model, only the p-value for male employees was found to be significant^[The full table of the estimates and 95 % confidence interval for the model is included in the Appendix]. Also, considering that the 95% confidence interval for male employees does not contain 0, there is evidence against the hypothesis that there is no difference in promotion frequency between men and women (which was our baseline for gender). Specifically, Table 2 suggests that the promotion rate per financial quarter for male employees was nearly 1.38 times greater than that of females, after controlling for other predictors. In other words, a gender bias was actually present in the promoting process at the Black Saber Software.  
+From the summary of the model, only the p-value for male employees was significant^[The full table of the estimates and 95 % confidence interval for the model is included in the Appendix]. Also, considering that the 95% confidence interval for male employees did not contain 0, there was an evidence against the hypothesis that there is no difference in promotion frequency between men and women^[Woman was our baseline for gender]. Specifically, Table 2 suggests that the promotion rate per financial quarter for male employees was nearly 1.38 times greater than that of females, after controlling for other predictors. In other words, a gender bias was actually present in the promoting process at the Black Saber Software.  
 
 
 ## Fairness in Hiring Process  
