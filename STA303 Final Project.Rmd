@@ -465,11 +465,10 @@ phase1_applicants_cleaned <- phase1_applicants %>%
 phase2_applicants_cleaned <- filter(phase2_applicants_cleaned, gender != "Prefer not to say")
 ```
 
-We first made variables telling us whether an applicant passed each hiring phase or not.
-Since our main purpose was to test whether or not gender affected applicants' acceptance, this ordinal variable helped us create a response variable that follows Bernoulli distribution.
-Some phases did not have information about applicants' gender, so we made all phases to have gender information of all applicants.
+Since our main purpose was to test whether or not gender affected applicants' acceptance, we first made variables telling us whether an applicant passed each hiring phase or not. This variable helped us create a response variable that follows Bernoulli distribution.
+Phase 3 data for hiring did not have information about applicants' gender, so we made all phases to have gender information by joining data from phase 2. We have also set woman as the baseline for gender variable so that we can make comparison of whether an applicant got hired by gender easily.
 
-In phase 2, we saw that none of the applicants who preferred not to say their gender got accepted and therefore, we omitted them from phase 2. 
+In phase 2, none of the applicants who preferred not to say their gender got accepted and therefore, we omitted them from phase 2. 
 
 ```{r hiring_visualization}
 #########################################################################################################
@@ -541,17 +540,16 @@ ggsave(file="images/hiring_boxplot_gender_2.png", box_proportion_interviewer1_2_
 
 ```
 
-Nearly half (50.7%) of our 613 applicants were females. 
 
 ![](images/hiring_barchart_gender.png)
 
-The proportions of female applicants who got accepted in phase 1 was similar to that of male applicants. On the other hand, among those who preferred not to say their gender, there was 25% difference between applicants who got accepted and who did not. However, this does not provide much evidence that phase 1 was biased for those who preferred not to say their gender, because we only had 11 applicants^[This is only 2% of all applicants.] who preferred not to say their gender and proportion largely depends on the number of applicants.
+The proportions of female applicants who got accepted in phase 1 was similar to that of male applicants. On the other hand, among those who preferred not to say their gender, there was 25% difference between applicants who got accepted and who did not. However, since only 11 of 613 applicants^[This is only 2% of all applicants.] preferred not to say their gender, having 25% difference among this small group of people does not provide much evidence that phase 1 was biased with gender for this group.
 
 In phase2, the proportion of male applicants who got accepted was 10%, which was around 6% greater than that of female applicants. 
 
 ![](images/hiring_boxplot_gender.png)
 
-In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Although there was a slight difference between mean scores of male and female who were assessed by interviewer 2, it was only a small difference of 2.5 in scores; Therefore, we found some evidence that gender did not influence the interview score.
+In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Although there was a slight difference between mean scores of male and female who were assessed by interviewer 2, it was only a small difference of 2.5 in scores. Therefore, we found some evidence that gender did not influence the interview score.
 
 **\underline{Methods}**  
 ```{r hiring_model_phase_1}
@@ -577,10 +575,10 @@ drop_in_deviance
 ```
 
 Although we did not know how AI evaluated each applicants, we put all variables as fixed effect, thinking that AI will consider all the variables into account. 
-Our response variable followed Bernoulli distribution, which indicated whether or not each applicant passed each phase. Since the logit link was used for Bernoulli response, we could assume that there was a linear relationship between the transformed response and explanatory variables. Also, we assumed that information of each applicants are independent. 
-After checking for the assumptions as above, we used generalized linear models.
+Our response variable followed Bernoulli distribution, which indicated whether or not each applicant passed each phase. Since the logit link was used for Bernoulli response, we could assume that there was a linear relationship between the transformed response and explanatory variables. Also, we assumed that information of each applicants were independent. 
+Since our response variable followed Bernoulli distribution, we used generalized linear models.
 
-In initial model, where gender was our only predictor, confidence interval of all genders included 0. Therefore at the 95% confidence level, it was believable that male and female applicants who preferred not to say their gender had the same log odds of being accepted by the AI in phase 1. In addition to this model, we tried to investigate whether the AI was biased with gender and other variables in phase 1 by comparing two models; One with all variables included and another with only gender excluded from the previous model.
+In initial model, where gender was our only predictor, confidence interval of all genders included 0. Therefore at the 95% confidence level, it was believable that male and female applicants, and applicants who preferred not to say their gender had the same log odds of being accepted by the AI in phase 1. In addition to this model, we tried to investigate whether the AI was biased with gender and other variables in phase 1 by comparing two models; One with all variables included^[This model includes the team that the applicant applied for, whether or not the applicant submitted a cover letter, CV, GPA, gender, the degree of relevance of extracurriculars to the company, and the amount of work experience.] and another with only gender excluded from the previous model.
 
 ```{r hiring_model_phase_2}
 #model where gender is only predictor
@@ -614,7 +612,8 @@ par(mfrow=c(2,2))
 plot(phase3_interviewer2)
 ```
 
-Lastly, for phase 3, we used a simple linear regression model with a single predictor, gender, for interview ratings. Here, we assumed that interview scores were linearly related to gender. By looking at the residuals and fitted value plot, we checked that the mean of the errors was 0. Also, standardized residuals and fitted value graph showed us the errors were homoscedastic. Lastly, the errors were uncorrelated.
+Lastly, for phase 3, we used a simple linear regression model with a single predictor, gender, for interview ratings. Since no trend was found in the residuals versus fitted values plot, we assumed that the linearity assumtion for the simple linear regression was satisfied. Also, the standardized residuals versus fitted values plot showed that the errors were homoscedastic. Further, the linear trend in the Normal Q-Q plot indicated that the normality assumption was satisfied. Lastly, we assumed that the independence assumption was also satisfied since the data contained interview scores for different applicants.
+
 
 **\underline{Results}**
 
@@ -647,22 +646,24 @@ This table shows the deviances and p-values for model 1 which excluded gender an
 \end{tabular}
 \end{table}
 
-The deviance tests using the two models told us that it is not preferable to add gender as a predictor variable to the models. The deviance difference between models in phase 1 with and without gender was 1.21, which was pretty small. Also, the large p-value supported that adding a new indicator variable, gender, to the model with all the other variables included was not very helpful in predicting the acceptance of an applicant.
+The deviance tests using the two models showed that it is not preferable to add gender as a predictor variable to the model. The deviance difference between models in phase 1 with and without gender was 1.21, which was pretty small. Also, the large p-value supported that adding a new indicator variable, gender, to the model with all the other variables included was not very helpful in predicting the acceptance of an applicant.
 
-Similarly, we could see that there were small deviance(0.62) and large p-value(0.43) in deviance test for phase 2 models. Therefore adding gender to the model did not explain the acceptance of applicants in phase 2. 
+Similarly, we could see that there were small deviance of 0.62 and large p-value of 0.43 in deviance test for phase 2 models. Therefore, adding gender to the model did not explain the acceptance of applicants in phase 2. 
 
-From confidence interval in phase 3, we could see that the coefficients of gender contained 0.^[The full table of the 95 % confidence interval for the model is included in the Appendix] Therefore, we concluded that interviewers were not biased with gender. In other words, gender did not affect interview scores.
+From the confidence interval in phase 3, we could see that the coefficients of gender contained 0.^[The full table of the 95 % confidence interval for the model is included in the Appendix] Therefore, we concluded that interviewers were not biased with gender. In other words, gender did not affect interview scores.
 
 \newpage
 ## Discussion
 
-Overall, the results of statistical analysis suggest that there is a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialing AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
+Overall, the results of statistical analysis suggest that there was a gender bias in salary distribution process and promotion process of current employees in Black Saber Software, but not for the hiring process using trialing AI and the human interviewer; For biased processes, men received higher salary and were more likely to get promoted than women, despite controlling for their talents and values to the company. 
 
-In particular, we found that salary will be affected by gender when other explanatory variables such as productivity, leadership, and team are controlled.
-Furthermore, for promotion, number of promotion also get affected by gender when other factors such as productivity, leadership, salary and role seniority are fixed.
-In hiring process, we can find that both AI and human are not biased with gender. Specifically, we found that applicants' acceptance will not be affected by gender assessed by AI. Also, the interview score will not be affected by gender when applicants are evaluated by interviewers in phase 3.
+In particular, we found that salary was affected by gender when other explanatory variables such as productivity, leadership, and team were controlled.
+Similarly, the number of promotion was affected by gender when other factors such as productivity, leadership, salary and role seniority were fixed.
+In hiring process, we revealed that both the AI and human interviewers were not biased with gender. Specifically, we found that applicants' acceptance was not affected by gender when assessed by AI. Also, the interview score was not affected by gender when applicants were evaluated by interviewers in phase 3.
 
 ### Strengths and limitations
+
+Throughout the analysis, we demonstrated high understandings of statistical concepts and the data provided by our client company, Black Saber Software. Instead of taking the superficial details of data, we considered how each variable may contribute to another variable by thinking about how the relationship between variables play out in real life. For example, when we modelled the number of promotions to see if there was a gender bias in the promotion process, we created an offset that accounts for different work periods of employees so that our response, the number of promotions, could be adjusted to be comparable across employees with different work periods. 
 
 One limitation of our analysis is that the provided data did not contain information on how the company would select employees for promotion. Understanding the company’s core values or knowing more about employee promotion policies will help us identify the right factors that affect employee promotion.
 
@@ -674,11 +675,11 @@ For future consideration of our study, we could look into promotion distribution
 # Consultant information
 ## Consultant profiles
 
-**Yoon Young Lee**. Yoon Young is a junior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
+**Yoon Young Lee**. Yoon Young is a senior data analyst with KoCad. She specializes in data visualization and data analysis. Yoon Young earned her Bachelor of Science, Specializing in Psychology and Majoring in Statistics from the University of Toronto in 2022. 
 
 **Guemin Kim**. Guemin is a junior data engineer with KoCad. She specializes in data analysis and machine learning. Guemin earned her Bachelor of Science, Majoring in Actuarial Science and Statistics from the University of Toronto in 2022.
 
-**Woolim Kim**. Woolim is an intern statistician with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
+**Woolim Kim**. Woolim is an junior statistician with KoCad. He specializes in data visualization and statistical communication. Woolim earned his Bachelor of Science, Majoring in Statistics and Economics from the University of Toronto in 2022.
 
 **Hojung Kim**. Hojung is a junior data analyst with KoCad. He specializes in mathematical statistics and statistical communication. Hojung earned his Bachelor of Science, Majoring in Statistics and Mathematics from the University of Toronto in 2022.
 
