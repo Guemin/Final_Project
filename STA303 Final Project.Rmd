@@ -464,10 +464,10 @@ phase2_applicants_cleaned <- filter(phase2_applicants_cleaned, gender != "Prefer
 ```
 
 We first made variables telling us whether an applicant passed each hiring phase or not.
-Since our main purpose was to test whether or not the gender of applicants affected the acceptance of the phase, this ordinal variable helped us create a response variable that follows Bernoulli distribution.
-Some phases did not have information about genders of applicants, so we made all phases to have gender information of all applicants.
+Since our main purpose was to test whether or not gender affected applicants' acceptance, this ordinal variable helped us create a response variable that follows Bernoulli distribution.
+Some phases did not have information about applicants' gender, so we made all phases to have gender information of all applicants.
 
-In phase 2, we could see that none of the applicants who preferred not to say about their gender got accepted and therefore, we omitted them from phase 2. 
+In phase 2, we saw that none of the applicants who preferred not to say their gender got accepted and therefore, we omitted them from phase 2. 
 
 ```{r hiring_visualization}
 #########################################################################################################
@@ -543,14 +543,13 @@ Nearly half (50.7%) of our 613 applicants were females.
 
 ![](images/hiring_barchart_gender.png)
 
-The proportions of applicants who were accepted in phase 1 had similar proportion between male and female. However, there is 25% difference in the the accepted rate in phase 1 with the applicants who prefered not to say their gender.
-This difference makes sense since proportion depends on the number of the applicants largely. We have only 11 Prefer not to say applicants, which is 2% of whole applicants. 
+The proportions of female applicants who got accepted in phase 1 was similar to that of male applicants. On the other hand, among those who preferred not to say their gender, there was 25% difference between applicants who got accepted and who did not. However, this does not provide much evidence that phase 1 was biased for those who preferred not to say their gender, because we only had 11 applicants^[This is only 2% of all applicants.] who preferred not to say their gender and proportion largely depends on the number of applicants.
 
-In phase2, we can see male has slightly higher approved proportion(10%) within male applicants, which is about 6% higher than female.
+In phase2, the proportion of male applicants who got accepted was 10%, which was around 6% greater than that of female applicants. 
 
 ![](images/hiring_boxplot_gender.png)
 
-In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Although there was a slight difference between mean scores of male and female who were assessed by interviewer 2, it was only a small difference of 2.5 in scores; Therefore, we could assume that gender did not influence the interview score.
+In phase 3, the ranges of interview scores given by interviewer 1 and 2 were similar to each other. Although there was a slight difference between mean scores of male and female who were assessed by interviewer 2, it was only a small difference of 2.5 in scores; Therefore, we found some evidence that gender did not influence the interview score.
 
 **\underline{Methods}**  
 ```{r hiring_model_phase_1}
@@ -576,10 +575,10 @@ drop_in_deviance
 ```
 
 Although we did not know how AI evaluated each applicants, we put all variables as fixed effect, thinking that AI will consider all the variables into account. 
-Response variable followed Bernoulli distribution, which indicates whether each applicant passed each phase or not. Since the logit link was used for Bernoulli response, we could assume that there was a linear relationship between the transformed response and explanatory variables. Also, We could assume that information of each applicants are independent. 
-After checking for the assumptions as above, we used generalized mixed model.
+Our response variable followed Bernoulli distribution, which indicated whether or not each applicant passed each phase. Since the logit link was used for Bernoulli response, we could assume that there was a linear relationship between the transformed response and explanatory variables. Also, we assumed that information of each applicants are independent. 
+After checking for the assumptions as above, we used generalized linear models.
 
-In initial model, where gender was our only predictor, confidence interval of all genders included 0. Therefore at the 95% confidence level, it was believable that male and female applicants who preferred not to say about their gender had the same log odds of being accepted by AI in phase 1. In addition to this model, we tried to investigate whether the AI was biased with gender and other variables in phase 1 by comparing two models; One with all variables included and another with gender excluded from the first model.
+In initial model, where gender was our only predictor, confidence interval of all genders included 0. Therefore at the 95% confidence level, it was believable that male and female applicants who preferred not to say their gender had the same log odds of being accepted by the AI in phase 1. In addition to this model, we tried to investigate whether the AI was biased with gender and other variables in phase 1 by comparing two models; One with all variables included and another with only gender excluded from the previous model.
 
 ```{r hiring_model_phase_2}
 #model where gender is only predictor
@@ -613,14 +612,14 @@ par(mfrow=c(2,2))
 plot(phase3_interviewer2)
 ```
 
-Lastly, for phase 3, we used a simple linear regression model. We had one predictor, gender, for interview ratings. we assumed that interview scores were related to gender linearly. By residuals and fitted value plot we could see that the mean of the errors was 0. Also, standardized residuals and fitted value graph showed us the errors were homoscedastic. Lastly, the errors were uncorrelated.
+Lastly, for phase 3, we used a simple linear regression model with a single predictor, gender, for interview ratings. Here, we assumed that interview scores were linearly related to gender. By looking at the residuals and fitted value plot, we checked that the mean of the errors was 0. Also, standardized residuals and fitted value graph showed us the errors were homoscedastic. Lastly, the errors were uncorrelated.
 
 **\underline{Results}**
 
-This table shows the deviance and p-value for model 1 which excluded gender and model 2 which include all variables:
+This table shows the deviances and p-values for model 1 which excluded gender and model 2 which include all variables:
 
 \begin{table}[h]
-\caption{Partial Table of Deviance and P-value for Gender in the Phase 1 and 2}
+\caption{Partial Table of Deviances and P-values for Gender in the Phase 1 and 2}
 \label{tab:my-table}
 \centering
 \begin{tabular}{llllll}
