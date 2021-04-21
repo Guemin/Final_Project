@@ -32,14 +32,15 @@ knitr::opts_chunk$set(include=FALSE)
 # Executive summary
 
 ## Background & Aim
-Current research was conducted by KoCad to investigate potential biases as well as the gender disparity issues that may exist in the company's recruitment, wage, and promotion schemes. To study the potential gender bias in the company's salary and promoting systems, we evaluated whether employees at the company were being paid and promoted fairly and that those processes were not influenced by discriminatory factors such as gender. We also investigated whether or not any kind of bias was included in each hiring phase that uses either the AI service or the score ratings of interviewers who evaluated applicants.
+Current research was conducted by KoCad to investigate potential biases as well as the gender disparity issues that may exist in Black Saber's recruitment, wage, and promotion schemes. To study the potential gender bias in the company's salary and promoting systems, we evaluated whether employees at the company were being paid and promoted fairly and that those processes were not influenced by discriminatory factors such as gender. We also investigated whether or not any kind of bias was included in each hiring phase that uses either the AI service or the score ratings of interviewers who evaluated applicants.
 
 ## Key findings
 - Male employees' average salary was approximately $1785.6 dollars more than that of female.
-- Among those who have never been promoted, the proportion of female employees was slightly greater than that of male employees; However, unlike the proportion of male employees that increased with the number of promotions, the proportion of female employees decreased as the number of promotions increased.
+- Among those who have never been promoted, the proportion of female employees was slightly greater than that of male employees.
+- Unlike the proportion of male employees that increased with the number of promotions, the proportion of female employees decreased as the number of promotions increased.
 - The promotion rate per financial quarter for the male employees was about 1.38 times greater than female employees.
-- In the first and hiring phase assessed by AI, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
-- In the third hiring phase, only 7% of the applicants were invited to an interview and among them, the averages of grades of interview between male and female were similar.
+- In the first and second hiring phases assessed by AI, the proportion of applicants who got approved to next phase was approximately evenly split between male and female.
+- In the third hiring phase, only 7% of the applicants were invited to an interview and among them, the averages of interview scores between male and female applicants were similar.
 
 ## Limitations
 The lack of information on salary determination methods, promotion policies, and evaluation criteria in the hiring process has limited our models' ability to produce more accurate results.
@@ -83,7 +84,7 @@ Throughout the analysis, we focused on assessing the fairness in the hiring, pro
 ## A Potential Gender Bias in Salary  
 **\underline{Data Wrangling and Visualizations}**  
 
-For data wrangling, we first changed the salary variable in the current employee data from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separates the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than being in an alphabetical order. We have also set woman as the baseline for gender variable so that we can make comparisons of each of salary and promotion by gender easily.
+For data wrangling, we first changed the salary variable in the current employee data from characters to doubles so that we can fit a regression model with the salary variable as a response. We removed the dollar sign in the front and a comma sign that separated the thousands value. Then, we reordered the factor level of the employee's seniority of role such that it matches the actual hierarchy in the company rather than being in an alphabetical order. We have also set woman as the baseline for gender variable so that we can make comparisons of each of salary and promotion by gender easily.
 
 ```{r}
 ############################################################################################################
@@ -110,7 +111,7 @@ black_saber_current_employees_cleaned <- black_saber_current_employees %>%
 
 ```
   
-Based on the current employee data, leadership level and productivity of an employee seemed to be the variables that shows the employee's value to the company. However, we also suspected that team and seniority of role may also have fixed effect on salary since based on those variables, the employee will have differential value to the company. For instance, some teams like software and data team, might be more valuable to the company because Black Saber is a software company. Also, for seniority of role, the higher position an employee takes, the more challenging work they have to do and thus more valuable to the company. 
+Based on the current employee data, leadership level and productivity of an employee seemed to be the variables that show the employee's value to the company. However, we also suspected that team and seniority of role may also have fixed effect on salary since based on those variables, the employee will have differential value to the company. For instance, some teams like software and data team, might be more valuable to the company because Black Saber is a software company. Also, for seniority of role, the higher position an employee takes, the more challenging work they have to do and thus more valuable to the company. 
 
 To figure out whether such speculation is true, we fitted a boxplot. 
 ```{r}
@@ -135,7 +136,7 @@ ggsave("images/salary_boxplot_team.png", width = 6, height = 3.8)
 
 ```
 ![](images/salary_boxplot_team.png)
-Indeed, the software and data teams generally receive higher salary than other teams as shown in Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.  
+Indeed, the software and data teams generally received higher salary than other teams as shown in Figure 1. Thus, we also included team and seniority of role as predictors to a regression model.  
 
 ```{r}
 
@@ -160,9 +161,9 @@ ggsave("images/salary_boxplot_role.png", width = 6, height = 3)
 
 ![](images/salary_boxplot_role.png)
 
-Also, we see that salary significantly depends on the person's role seniority level. In particular, manager, director, vice president receive salaries significantly different from other positions (see Figure 2). 
+Also, we saw that salary significantly depended on the person's role seniority level. In particular, as shown in Figure 2, manager, director and vice president received salaries significantly different from other positions. 
 
-We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1). Although gender did not seemed to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggested a significant difference. However, we needed to see this along with other variables related to an employee's value to the company. Thus, we investigated whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
+We also looked at a boxplot for salary by gender to see whether there is a gender difference in salary (see Appendix Figure 1A). Although gender did not seemed to create sysemtatic difference, the one-way anova of gender as a predictor and salary as a response suggested a significant difference. However, we needed to see this along with other variables related to an employee's value to the company. Thus, we investigated whether a regression model with and without gender as a predictor significantly differs after we fit each model and make comparison.
 
 ```{r}
 #########################################################################################################
@@ -191,7 +192,7 @@ lmod_gender <- lm(salary ~ gender, data = black_saber_current_employees_cleaned)
 
 **\underline{Methods}**  
 
-We chose a linear mixed effects model for the regression model because financial quarter will also produce sysematic difference, since for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we were not interested in this variable because we only cared about the employee's value. Further, statistically speaking, employees' salaries were sampled across various financial quarter and so this would violate the independence assumption for observations. Thus, it was important to add financial quarter as a random intercept.
+We chose a linear mixed effects model because we suspected that financial quarter could also produce sysematic difference in salary - for instance, in financial quarters where Black Saber earns a lot of money, employees will receive bonuses. However, we were not interested in this variable because we only cared about the employee's value. Further, statistically speaking, employees' salaries were sampled across various financial quarter and so this would violate the independence assumption for observations. Thus, it was important to add financial quarter as a random intercept rather than a fixed effect.
 
 ```{r}
 #########################################################################################################
@@ -213,7 +214,7 @@ salary_lmer_no_gender <- lmer(salary ~ team + role_seniority + leadership_for_le
 
 ```
 
-Results of the maximum likelihood test comparing models with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors was significant. The significant p-value showed that we have no evidence against the claim that simpler model is better. In other words, we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicated that gender causes notable difference in salary and therefore there is a gender bias in salary.
+Result of the maximum likelihood test comparing models with and without gender as predictor while including seniority of role, team, leadership, and productivity as other predictors was significant. The significant p-value showed that we have no evidence against the claim that simpler model is better. In other words, the result told us that we should go with the complex model, which is the model that includes gender as predictor, to have better predictive ability for salary. This result implicated that gender causes notable difference in salary and therefore there is a gender bias in salary.
 
 ```{r, echo=TRUE}
 #########################################################################################################
@@ -332,7 +333,7 @@ promotion_count_by_gender_plot_2 <- promotion_data %>%
   geom_histogram(colour = "grey", binwidth= 1) +
   theme_minimal() +
   labs(x = "Number of Promotions for employees",
-       caption = "Figure1: Distribution of employees' number of promotion, showing genders as different colour.\nEach bar's height represents the count for number of promotions") + 
+       caption = "Figure1: Distribution of employees' number of promotion, showing genders as different colour.\nEach bar's height represents the count of employees with each number of promotions.") + 
   scale_fill_manual(values=c("#6666CC", "#6C3082","#9999CC")) +
   theme(plot.caption = element_text(hjust = 0))
 
